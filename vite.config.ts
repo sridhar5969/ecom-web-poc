@@ -14,12 +14,12 @@ export default defineConfig(({ mode }) => {
 			react(),
 			// Bundle analyzer - only in production builds
 			process.env.ANALYZE === 'true' &&
-			visualizer({
-				filename: 'dist/bundle-analysis.html',
-				open: true,
-				gzipSize: true,
-				brotliSize: true
-			})
+				visualizer({
+					filename: 'dist/bundle-analysis.html',
+					open: true,
+					gzipSize: true,
+					brotliSize: true
+				})
 		].filter(Boolean),
 		build: {
 			// Increase chunk size warning limit to 1MB
@@ -36,12 +36,7 @@ export default defineConfig(({ mode }) => {
 						// React ecosystem
 						'react-vendor': ['react', 'react-dom', 'react-router-dom'],
 						// MUI ecosystem
-						'mui-vendor': [
-							'@mui/material',
-							'@mui/x-date-pickers',
-							'@emotion/react',
-							'@emotion/styled'
-						],
+						'mui-vendor': ['@mui/material', '@mui/x-date-pickers', '@emotion/react', '@emotion/styled'],
 						// State management
 						'state-vendor': ['@reduxjs/toolkit', 'react-redux'],
 						// Form handling
@@ -66,7 +61,7 @@ export default defineConfig(({ mode }) => {
 			terserOptions: {
 				compress: {
 					// Remove console logs in production
-					drop_console:process.env.NODE_ENV === 'development' ? false : true,
+					drop_console: process.env.NODE_ENV === 'development' ? false : true,
 					drop_debugger: true,
 					// Remove unused code
 					unused: true,
@@ -129,8 +124,10 @@ export default defineConfig(({ mode }) => {
 		// Define environment variables
 		// Expose non-VITE_ prefixed env vars to client via import.meta.env
 		define: {
-			'import.meta.env.API_BASE_URL': JSON.stringify(env.API_BASE_URL || 'http://localhost:8000/web/'),
-			'import.meta.env.API_BASE_URL_PRE_AUTH': JSON.stringify(env.API_BASE_URL_PRE_AUTH || 'http://localhost:8000/'),
+			'import.meta.env.API_BASE_URL': JSON.stringify(env.API_BASE_URL || 'http://localhost:8000/api/'),
+			'import.meta.env.API_BASE_URL_PRE_AUTH': JSON.stringify(
+				env.API_BASE_URL_PRE_AUTH || 'http://localhost:8000/api/'
+			),
 			'import.meta.env.REDIRECT_URI': JSON.stringify(env.REDIRECT_URI || 'http://localhost:5173/auth/login')
 		}
 	};

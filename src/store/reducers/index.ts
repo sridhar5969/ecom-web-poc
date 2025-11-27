@@ -2,6 +2,7 @@ import { combineReducers, AnyAction } from 'redux';
 import { LOGOUT, AuthActionTypes } from './actions';
 import TokenStorage from '../../utils/TokenStorage';
 import { apiSlices } from '../api';
+import cartReducer from '../slices/cart.slice';
 
 // Auto-discover and register all API reducers
 const apiReducers = apiSlices.reduce(
@@ -12,10 +13,16 @@ const apiReducers = apiSlices.reduce(
 	{} as Record<string, (typeof apiSlices)[number]['reducer']>
 );
 
-const rootReducer = combineReducers(apiReducers);
+// Combine ALL reducers from imported slices
+const rootReducer = combineReducers({
+	...apiReducers,
+	cart: cartReducer
+});
 
 // Handle the LOGOUT action
 const appReducer = (state: ReturnType<typeof rootReducer> | undefined, action: AnyAction) => {
+	console.log('ACTION FIRED:', action.type);
+
 	if (action.type === LOGOUT) {
 		TokenStorage.clearTokens();
 		state = undefined;

@@ -8,34 +8,35 @@ const Typography = (fontFamily: string) => ({
 	fontWeightMedium: 500,
 	fontWeightBold: 600,
 	h1: {
-		fontWeight: 600,
+		fontWeight: 700, // Bolder
 		fontSize: '2.375rem',
 		lineHeight: 1.21
 	},
 	h2: {
-		fontWeight: 600,
+		fontWeight: 700,
 		fontSize: '1.875rem',
 		lineHeight: 1.27
 	},
 	h3: {
 		fontWeight: 600,
-		fontSize: '1.5rem',
+		fontSize: '1.5rem', // Product Titles on PDP
 		lineHeight: 1.33
 	},
 	h4: {
 		fontWeight: 600,
-		fontSize: '1.25rem',
+		fontSize: '1.25rem', // "Featured Products"
 		lineHeight: 1.4
 	},
 	h5: {
 		fontWeight: 600,
-		fontSize: '1rem',
+		fontSize: '1rem', // Product Titles on Cards
 		lineHeight: 1.5
 	},
 	h6: {
-		fontWeight: 400,
+		fontWeight: 600, // Price needs to be bold
 		fontSize: '0.875rem',
 		lineHeight: 1.57
+		// color: '#E53935' // Optional: Default H6 to red if mostly used for price
 	},
 	caption: {
 		fontWeight: 400,
@@ -64,7 +65,8 @@ const Typography = (fontFamily: string) => ({
 		lineHeight: 1.66
 	},
 	button: {
-		textTransform: 'capitalize' as const
+		textTransform: 'capitalize' as const, // The buttons in UI are "Add to Cart", not "ADD TO CART"
+		fontWeight: 500
 	}
 });
 

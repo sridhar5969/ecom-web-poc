@@ -5,6 +5,8 @@ import { logger } from '../../../services/logger/logger.service';
 import { CACHE_DURATION } from '../../../constants';
 import type { ErrorResponse } from '../../../types/api.types';
 
+const PUBLIC_PATHS = ['/products', '/products/', '/cart', '/login'];
+
 export const sessionApi = createApi({
 	reducerPath: 'sessionApi',
 	baseQuery,
@@ -34,9 +36,9 @@ export const sessionApi = createApi({
 
 const { useUserSessionContextQuery } = sessionApi;
 
-const useSessionContextQuery = (token: string | null) => {
+const useSessionContextQuery = () => {
 	const query = useUserSessionContextQuery(null, {
-		skip: !token,
+		skip: false, // ALWAYS run session on load
 		refetchOnMountOrArgChange: false,
 		refetchOnReconnect: false
 	});

@@ -26,17 +26,22 @@ import {
 	MdSecurity as Security,
 	MdSupervisorAccount as SupervisorAccount,
 	MdSettings as Settings,
-	MdNotificationsNone as NotificationsNone
+	MdNotificationsNone as NotificationsNone,
+	MdShoppingCart
 } from 'react-icons/md';
 import { useRole } from '../../../contexts/useRole';
 import { useLogout } from '../../../hooks/useLogOut';
-
+import { useNavigate } from 'react-router-dom';
+import { selectCartTotalQty } from '../../../store/slices/cart.slice';
+import { useAppSelector } from '../../../store/store';
 interface ModernTopBarProps {
 	onMenuToggle: () => void;
 	drawerOpen: boolean;
 }
 
 const ModernTopBar = ({ onMenuToggle, drawerOpen }: ModernTopBarProps) => {
+	const navigate = useNavigate();
+	const totalQty = useAppSelector(selectCartTotalQty);
 	const theme = useTheme();
 	const { currentRole, availableRoles, userInfo, switchRole } = useRole();
 	const logout = useLogout();
@@ -115,7 +120,7 @@ const ModernTopBar = ({ onMenuToggle, drawerOpen }: ModernTopBarProps) => {
 			>
 				{/* Left Section - Menu Toggle & Logo */}
 				<Stack direction="row" alignItems="center" spacing={{ xs: 1.5, sm: 2 }}>
-					<IconButton
+					{/* <IconButton
 						onClick={onMenuToggle}
 						sx={{
 							color: '#1a1a1a',
@@ -131,7 +136,7 @@ const ModernTopBar = ({ onMenuToggle, drawerOpen }: ModernTopBarProps) => {
 						}}
 					>
 						<MenuIcon style={{ fontSize: 18 }} />
-					</IconButton>
+					</IconButton> */}
 
 					<Typography
 						variant="h6"
@@ -149,6 +154,12 @@ const ModernTopBar = ({ onMenuToggle, drawerOpen }: ModernTopBarProps) => {
 
 				{/* Right Section - Notifications & User Profile */}
 				<Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1, md: 1 }}>
+					{/* Cart Icon */}
+					<IconButton onClick={() => navigate('/cart')}>
+						<Badge badgeContent={totalQty} color="error">
+							<MdShoppingCart />
+						</Badge>
+					</IconButton>
 					{/* Notifications */}
 					<Tooltip title="Notifications">
 						<IconButton

@@ -1,6 +1,5 @@
 import type { ComponentType } from 'react';
-import { MdDashboard } from 'react-icons/md';
-import Sample from '../pages/business/Sample';
+import { sampleModule } from './protected/modules/sample.module';
 
 // Lazy-loaded components
 export const imports = {};
@@ -42,25 +41,7 @@ export interface MainModuleConfig {
 }
 
 // Main module configurations with hierarchical structure
-export const mainModuleConfigs: MainModuleConfig[] = [
-	{
-		text: 'Sample Template', // Module name
-		icon: MdDashboard, // Module icon
-		order: 1, // Sidebar ordering
-		submodules: [
-			{
-				text: 'Sample Template List', // Sidebar text
-				path: 'business/sample', // Route URL
-				element: Sample, // Actual React component
-				permission: 'viewdashboard',
-				icon: MdDashboard,
-				showInSidebar: true,
-				order: 1,
-				isInitial: false
-			}
-		]
-	}
-];
+export const mainModuleConfigs = [sampleModule];
 
 // Flattened screen configurations for backward compatibility and routing
 export const screenConfigs: ScreenConfig[] = mainModuleConfigs.flatMap(module => module.submodules);

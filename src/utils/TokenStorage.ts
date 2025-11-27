@@ -4,7 +4,7 @@ import Cookie from './Cookie';
 /**
  * Token storage keys
  */
-const ACCESS_TOKEN_KEY = 'accessToken';
+const ACCESS_TOKEN_KEY = 'refreshToken';
 const REFRESH_TOKEN_KEY = 'refreshToken';
 
 /**

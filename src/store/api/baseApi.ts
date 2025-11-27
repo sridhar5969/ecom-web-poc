@@ -182,6 +182,10 @@ export const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryE
 
 		// Handle 401 unauthorized - attempt token refresh
 		if (result.error?.status === HTTP_STATUS.UNAUTHORIZED) {
+			if (!TokenStorage.getRefreshToken()) {
+				return result; // ← prevent refresh attempts for public routes
+			}
+
 			const refreshSuccessful = await attemptTokenRefresh(api, extraOptions);
 
 			if (refreshSuccessful) {

@@ -53,9 +53,11 @@ const Theme = (colors: ColorPalette) => {
 	};
 	const contrastText = '#fff';
 
-	// Define the primary and secondary base colors
-	const primaryBaseColor = '#0D5FDC';
-	const secondaryBaseColor = '#042E70';
+	// Extracted from the "Add to Cart" button and Logo
+	const primaryBaseColor = '#E53935'; // Tolaram Red
+
+	// Extracted from the Top Navigation Bar
+	const secondaryBaseColor = '#232F3E'; // Deep Navy/Slate
 
 	// Utility functions to generate shades
 	const generateShades = (color: string) => ({
@@ -103,43 +105,57 @@ const Theme = (colors: ColorPalette) => {
 			contrastText: secondaryShades.contrastText
 		},
 		error: {
-			lighter: red[0],
-			light: red[2],
-			main: red[4],
-			dark: red[7],
-			darker: red[9],
+			lighter: '#ffebee',
+			light: '#ef5350',
+			main: '#d32f2f', // Standard Red for errors
+			dark: '#c62828',
+			darker: '#b71c1c',
 			contrastText
 		},
 		warning: {
-			lighter: gold[0],
-			light: gold[3],
-			main: gold[5],
-			dark: gold[7],
-			darker: gold[9],
+			lighter: '#fff8e1',
+			light: '#ffecb3',
+			main: '#ffca28', // Yellow stars color
+			dark: '#ffb300',
+			darker: '#ff6f00',
 			contrastText: greyColors[100]
 		},
-		info: {
-			lighter: cyan[0],
-			light: cyan[3],
-			main: cyan[5],
-			dark: cyan[7],
-			darker: cyan[9],
-			contrastText
-		},
 		success: {
-			lighter: green[0],
-			light: green[3],
-			main: green[5],
-			dark: green[7],
-			darker: green[9],
+			lighter: '#e8f5e9',
+			light: '#81c784',
+			main: '#2e7d32', // The "In Stock" Green
+			dark: '#1b5e20',
+			darker: '#003300',
 			contrastText
 		},
+		// info: {
+		// 	lighter: cyan[0],
+		// 	light: cyan[3],
+		// 	main: cyan[5],
+		// 	dark: cyan[7],
+		// 	darker: cyan[9],
+		// 	contrastText
+		// },
 		grey: greyColors,
 		yellow: yellowColors,
 		status: {
 			pending: '#FEF8E8',
 			accepted: '#48D7B9',
 			rejected: '#F9789A'
+		},
+		custom: {
+			bestseller: '#2196F3', // Blue tag
+			lush: '#9C27B0', // Purple tag
+			instant: '#E53935' // Red tag
+		},
+		text: {
+			primary: greyColors[900], // Darker text for headings
+			secondary: greyColors[600], // Lighter text for descriptions
+			disabled: greyColors[400]
+		},
+		background: {
+			paper: '#ffffff',
+			default: '#F4F6F8' // Light grey background seen behind cards
 		}
 	};
 };

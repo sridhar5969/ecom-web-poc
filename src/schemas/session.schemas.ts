@@ -13,11 +13,12 @@ export const sessionDataSchema = z.object({
 	id: z.string(),
 	name: z.string().min(1),
 	email: z.string().email(),
-	roleId: z.number().int().positive(),
-	roleName: z.string().min(1),
-	permissions: z.array(z.string())
+	role: z.enum(['admin', 'manager', 'customer']),
+	permissions: z.array(z.string()),
+	primaryAuthMethod: z.string().nullable(),
+	emailVerifiedAt: z.string().nullable(),
+	phoneVerifiedAt: z.string().nullable()
 });
-
 /**
  * Type inference from schemas
  */

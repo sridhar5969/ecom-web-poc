@@ -52,7 +52,7 @@ The authentication mode is controlled by the `VITE_AUTH_MODE` environment variab
 
 ```typescript
 // src/config/env.ts
-VITE_AUTH_MODE: z.enum(['cookie', 'localStorage']).optional().default('cookie')
+VITE_AUTH_MODE: z.enum(['cookie', 'localStorage']).optional().default('cookie');
 ```
 
 ---
@@ -66,21 +66,23 @@ VITE_AUTH_MODE: z.enum(['cookie', 'localStorage']).optional().default('cookie')
    - Form submission triggers `useLoginUserMutation`
 
 2. **Login API call** (`src/store/api/auth/auth.api.ts`)
+
    ```typescript
    POST /auth/login
    Body: { email: string, password: string }
    ```
 
 3. **Backend Response** (transformed by `transformResponse`)
+
    ```json
    {
-     "success": true,
-     "data": {
-       "accessToken": "eyJhbGciOiJIUzI1NiIs...",
-       "refreshToken": "eyJhbGciOiJIUzI1NiIs..."
-     },
-     "message": "Login successful",
-     "timestamp": "2024-01-01T00:00:00Z"
+   	"success": true,
+   	"data": {
+   		"accessToken": "eyJhbGciOiJIUzI1NiIs...",
+   		"refreshToken": "eyJhbGciOiJIUzI1NiIs..."
+   	},
+   	"message": "Login successful",
+   	"timestamp": "2024-01-01T00:00:00Z"
    }
    ```
 
@@ -99,15 +101,15 @@ VITE_AUTH_MODE: z.enum(['cookie', 'localStorage']).optional().default('cookie')
 const [loginUser] = useLoginUserMutation();
 
 const onSubmit = async (values: FormValues) => {
-  try {
-    await loginUser({
-      email: values.email,
-      password: values.password
-    }).unwrap();
-    navigate('/'); // Redirect to home
-  } catch (err) {
-    // Error handling
-  }
+	try {
+		await loginUser({
+			email: values.email,
+			password: values.password
+		}).unwrap();
+		navigate('/'); // Redirect to home
+	} catch (err) {
+		// Error handling
+	}
 };
 ```
 
@@ -135,23 +137,25 @@ TokenStorage.clearTokens(): void
 
 ### Token Storage Locations
 
-| Mode | Access Token | Refresh Token |
-|------|-------------|---------------|
+| Mode         | Access Token                          | Refresh Token                          |
+| ------------ | ------------------------------------- | -------------------------------------- |
 | localStorage | `localStorage.getItem('accessToken')` | `localStorage.getItem('refreshToken')` |
-| cookie | HTTP-only cookie | HTTP-only cookie |
+| cookie       | HTTP-only cookie                      | HTTP-only cookie                       |
 
 ### Token Usage in Requests
 
 **localStorage Mode:**
+
 ```typescript
 // Automatically added by rawBaseQuery
 headers.set('authorization', `Bearer ${token}`);
 ```
 
 **Cookie Mode:**
+
 ```typescript
 // Automatically sent with credentials: 'include'
-credentials: 'include'
+credentials: 'include';
 ```
 
 ---
@@ -169,6 +173,7 @@ The system automatically refreshes tokens when a 401 (Unauthorized) response is 
    - Triggers `attemptTokenRefresh()`
 
 2. **Token Refresh Queue** (Prevents race conditions)
+
    ```typescript
    // Only one refresh happens at a time
    // All concurrent requests wait for the same refresh
@@ -176,13 +181,16 @@ The system automatically refreshes tokens when a 401 (Unauthorized) response is 
    ```
 
 3. **Refresh Request**
+
    ```typescript
    // localStorage mode
-   POST /auth/refresh
-   Body: { refreshToken: string }
-   
+   POST / auth / refresh;
+   Body: {
+   	refreshToken: string;
+   }
+
    // cookie mode
-   POST /auth/refresh
+   POST / auth / refresh;
    // Refresh token sent via cookie
    ```
 
@@ -201,13 +209,13 @@ The system automatically refreshes tokens when a 401 (Unauthorized) response is 
 
 // 1. Request fails with 401
 if (result.error?.status === HTTP_STATUS.UNAUTHORIZED) {
-  // 2. Attempt token refresh
-  const refreshSuccessful = await attemptTokenRefresh(api, extraOptions);
-  
-  if (refreshSuccessful) {
-    // 3. Retry original request
-    result = await rawBaseQuery(args, api, extraOptions);
-  }
+	// 2. Attempt token refresh
+	const refreshSuccessful = await attemptTokenRefresh(api, extraOptions);
+
+	if (refreshSuccessful) {
+		// 3. Retry original request
+		result = await rawBaseQuery(args, api, extraOptions);
+	}
 }
 ```
 
@@ -218,11 +226,12 @@ The refresh mechanism uses Promise deduplication:
 ```typescript
 // If refresh is already in progress, wait for it
 if (refreshTokenPromise) {
-  return refreshTokenPromise; // All requests share the same promise
+	return refreshTokenPromise; // All requests share the same promise
 }
 ```
 
 This ensures:
+
 - Only one refresh request is made
 - All concurrent 401 errors wait for the same refresh
 - No duplicate refresh attempts
@@ -235,12 +244,12 @@ This ensures:
 
 ```typescript
 interface SessionData {
-  id: string;
-  name: string;
-  email: string;
-  roleId: number;
-  roleName: string;
-  permissions: string[];
+	id: string;
+	name: string;
+	email: string;
+	roleId: number;
+	roleName: string;
+	permissions: string[];
 }
 ```
 
@@ -264,7 +273,7 @@ Session data is validated using Zod schema:
 ```typescript
 const parsed = sessionDataSchema.safeParse(response);
 if (!parsed.success) {
-  throw new Error('Invalid session context structure');
+	throw new Error('Invalid session context structure');
 }
 ```
 
@@ -278,22 +287,22 @@ Routes are protected in `useAuthRoutes` hook:
 
 ```typescript
 export function useAuthRoutes() {
-  const token = TokenStorage.getAccessToken();
-  const { data, isLoading, isError } = useSessionContextQuery(token);
+	const token = TokenStorage.getAccessToken();
+	const { data, isLoading, isError } = useSessionContextQuery(token);
 
-  // 1. No token → Show login routes
-  if (!token) return [LoginRoutes];
+	// 1. No token → Show login routes
+	if (!token) return [LoginRoutes];
 
-  // 2. Loading → Show loading state
-  if (isLoading || !data) return [createLoadingRoutes()];
+	// 2. Loading → Show loading state
+	if (isLoading || !data) return [createLoadingRoutes()];
 
-  // 3. Error → Show error page
-  if (isError || !data) return [createErrorRoutes(errorMessage)];
+	// 3. Error → Show error page
+	if (isError || !data) return [createErrorRoutes(errorMessage)];
 
-  // 4. Authenticated → Generate routes based on permissions
-  const permissions = getAllPermissions(data);
-  const orderedScreens = getOrderedScreens(permissions);
-  // ... create dynamic routes
+	// 4. Authenticated → Generate routes based on permissions
+	const permissions = getAllPermissions(data);
+	const orderedScreens = getOrderedScreens(permissions);
+	// ... create dynamic routes
 }
 ```
 
@@ -312,11 +321,11 @@ const dynamicRoutes = orderedScreens.map(screen => ({
 
 ### Route States
 
-| State | Action |
-|-------|--------|
-| No token | Show login page |
-| Loading | Show loading spinner |
-| Error | Show error page |
+| State         | Action                |
+| ------------- | --------------------- |
+| No token      | Show login page       |
+| Loading       | Show loading spinner  |
+| Error         | Show error page       |
 | Authenticated | Show protected routes |
 
 ---
@@ -326,14 +335,16 @@ const dynamicRoutes = orderedScreens.map(screen => ({
 ### Step-by-Step Process
 
 1. **User triggers logout** (e.g., clicks logout button)
+
    ```typescript
    const logout = useLogout();
    await logout();
    ```
 
 2. **Logout API call**
+
    ```typescript
-   POST /auth/logout
+   POST / auth / logout;
    // Cookies are cleared by backend (cookie mode)
    ```
 
@@ -342,6 +353,7 @@ const dynamicRoutes = orderedScreens.map(screen => ({
    - Tokens removed from storage
 
 4. **Redux state reset**
+
    ```typescript
    dispatch(logoutApp()); // Clears all Redux state
    ```
@@ -354,22 +366,22 @@ const dynamicRoutes = orderedScreens.map(screen => ({
 ```typescript
 // src/hooks/useLogOut.tsx
 export const useLogout = () => {
-  const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const [logoutUser] = useLogoutUserMutation();
+	const dispatch = useAppDispatch();
+	const navigate = useNavigate();
+	const [logoutUser] = useLogoutUserMutation();
 
-  const logout = async () => {
-    try {
-      await logoutUser().unwrap();
-    } catch (err) {
-      // Clear tokens even if API call fails
-      TokenStorage.clearTokens();
-    }
-    dispatch(logoutApp()); // Reset Redux
-    navigate('/'); // Redirect to login
-  };
+	const logout = async () => {
+		try {
+			await logoutUser().unwrap();
+		} catch (err) {
+			// Clear tokens even if API call fails
+			TokenStorage.clearTokens();
+		}
+		dispatch(logoutApp()); // Reset Redux
+		navigate('/'); // Redirect to login
+	};
 
-  return logout;
+	return logout;
 };
 ```
 
@@ -380,8 +392,8 @@ On logout, the entire Redux state is reset:
 ```typescript
 // src/store/reducers/index.ts
 if (action.type === LOGOUT) {
-  TokenStorage.clearTokens();
-  state = undefined; // Reset entire state
+	TokenStorage.clearTokens();
+	state = undefined; // Reset entire state
 }
 ```
 
@@ -394,26 +406,30 @@ if (action.type === LOGOUT) {
 #### 401 Unauthorized
 
 **Automatic Handling:**
+
 1. Token refresh is attempted
 2. If refresh succeeds, request is retried
 3. If refresh fails, user is logged out
 
 **Middleware Response:**
+
 ```typescript
 // src/store/store.ts
 if (status === HTTP_STATUS.UNAUTHORIZED) {
-  dispatch(logoutApp());
-  notificationService.error(ERROR_MESSAGES.SESSION_EXPIRED, 'Session Expired');
+	dispatch(logoutApp());
+	notificationService.error(ERROR_MESSAGES.SESSION_EXPIRED, 'Session Expired');
 }
 ```
 
 #### Login Errors
 
 **Validation Errors:**
+
 - Displayed as notifications
 - Field-level validation shown in form
 
 **Server Errors:**
+
 - Error message displayed to user
 - Logged for debugging
 
@@ -438,11 +454,13 @@ Failure? → Logout User → Redirect to Login
 ### Token Storage
 
 **localStorage Mode:**
+
 - ⚠️ Tokens accessible via JavaScript (XSS risk)
 - ✅ Not sent automatically (CSRF protection)
 - ✅ Survives page refresh
 
 **Cookie Mode:**
+
 - ✅ HTTP-only cookies (XSS protection)
 - ⚠️ Automatically sent (CSRF risk - mitigated by backend)
 - ✅ More secure overall
@@ -540,7 +558,7 @@ import TokenStorage from '@utils/TokenStorage';
 
 function ProtectedComponent() {
   const token = TokenStorage.getAccessToken();
-  
+
   if (!token) {
     return <Navigate to="/login" />;
   }
@@ -642,19 +660,23 @@ function DataComponent() {
 ### Common Issues
 
 **Issue: Tokens not persisting after refresh**
+
 - Check `VITE_AUTH_MODE` environment variable
 - Verify token storage implementation matches mode
 
 **Issue: Multiple refresh requests**
+
 - Should be handled by refresh queue
 - Check `refreshTokenPromise` implementation
 
 **Issue: Session not loading**
+
 - Verify token exists: `TokenStorage.getAccessToken()`
 - Check network tab for `/session` request
 - Verify session API response format
 
 **Issue: Logout not working**
+
 - Check `TokenStorage.clearTokens()` implementation
 - Verify Redux `LOGOUT` action is dispatched
 - Check navigation after logout
@@ -680,7 +702,6 @@ The authentication system provides:
 ✅ **Secure token management**  
 ✅ **Comprehensive error handling**  
 ✅ **Session management** with caching  
-✅ **Clean logout flow** with state reset  
+✅ **Clean logout flow** with state reset
 
 The system is designed to be secure, maintainable, and user-friendly while providing flexibility for different deployment scenarios.
-

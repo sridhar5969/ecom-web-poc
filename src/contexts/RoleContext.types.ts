@@ -56,5 +56,5 @@ export interface RoleProviderProps {
 	/** Child components */
 	children: ReactNode;
 	/** Session data from the API (matches backend structure) */
-	sessionData: SessionData;
+	sessionData: SessionData | undefined;
 }

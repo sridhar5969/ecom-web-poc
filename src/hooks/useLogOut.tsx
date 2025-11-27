@@ -19,7 +19,7 @@ export const useLogout = () => {
 			TokenStorage.clearTokens();
 		}
 		dispatch(logoutApp()); // 🔹 reset Redux
-		navigate('/'); // 🔹 redirect to login
+		navigate('/auth/login'); // 🔹 redirect to login
 	};
 
 	return logout;

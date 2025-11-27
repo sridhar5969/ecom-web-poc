@@ -1,49 +1,45 @@
 import { Navigate } from 'react-router-dom';
-import TokenStorage from '../utils/TokenStorage';
-import MainLayout from '../layouts/MainLayout';
 import { getOrderedScreens, getInitialScreen } from '../routes/screenHelpers';
 import { useSessionContextQuery } from '../store/api/auth/session.api';
-import { LoginRoutes } from '../routes/LoginRoutes';
 import NotFound from '../pages/general/NotFound';
 import { getAllPermissions } from '../schemas/session.schemas';
 import { createLoadingRoutes, createErrorRoutes } from './useAuthRoutes.constants';
-
+import MinimalLayout from '../layouts/MinimalLayout';
+import { StorefrontRoutes } from '../routes/public/storefront.routes';
+import { LoginRoutes } from '../routes/auth/LoginRoutes';
 export function useAuthRoutes() {
-	const token = TokenStorage.getAccessToken();
+	const publicRoutes = [StorefrontRoutes];
 
-	const { data, isLoading, isError, errorMessage } = useSessionContextQuery(token);
+	const { data, isLoading, isError, errorMessage } = useSessionContextQuery();
 
-	if (!token) return [LoginRoutes];
+	if (isLoading) return [...publicRoutes, createLoadingRoutes()];
 
-	if (isLoading || !data) return [createLoadingRoutes()];
+	if (isError) return [...publicRoutes, createErrorRoutes(errorMessage ?? 'Error')];
 
-	if (isError || !data) return [createErrorRoutes(errorMessage ?? 'unknown Error')];
+	// user not authenticated → public + login
+	if (!data) return [...publicRoutes, LoginRoutes];
 
-	// Use static permissions for initial route setup
+	// ----- USER AUTHENTICATED → BUILD PROTECTED ROUTES -----
 	const permissions = getAllPermissions(data);
 	const orderedScreens = getOrderedScreens(permissions);
 	const initialScreen = getInitialScreen(permissions);
 
-	// Create dynamic routes based on ordered screens
 	const dynamicRoutes = orderedScreens.map(screen => ({
 		path: screen.path,
 		element: <screen.element />
 	}));
 
-	const finalRoutes = [
+	const protectedRoutes = [
 		{
-			path: '/',
-			element: <Navigate to={initialScreen?.path || '/not-found'} replace />
-		},
-		...dynamicRoutes,
-		{ path: '*', element: <NotFound /> } //wildcard
-	];
-
-	return [
-		{
-			path: '/',
-			element: <MainLayout />,
-			children: finalRoutes
+			path: '/admin',
+			element: <MinimalLayout />,
+			children: [
+				{ path: 'dashboard', element: <Navigate to={initialScreen?.path || '/not-found'} replace /> },
+				...dynamicRoutes,
+				{ path: '*', element: <NotFound /> }
+			]
 		}
 	];
+
+	return [...publicRoutes, ...protectedRoutes];
 }

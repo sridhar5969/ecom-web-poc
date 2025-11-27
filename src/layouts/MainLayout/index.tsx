@@ -30,8 +30,7 @@ const MainLayout = () => {
 	// Determine final drawer state
 	const drawerOpen = manuallyToggled ? !shouldBeOpen : shouldBeOpen;
 
-	const token = TokenStorage.getAccessToken();
-	const { data, isLoading, isError, errorMessage } = useSessionContextQuery(token);
+	const { data, isLoading, isError, errorMessage } = useSessionContextQuery();
 
 	if (isLoading) return <BackdropLoader />;
 	if (isError || !data) return <SessionError errMsg={errorMessage} />;

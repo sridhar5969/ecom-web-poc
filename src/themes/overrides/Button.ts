@@ -1,29 +1,22 @@
-// ==============================|| OVERRIDES - BUTTON ||============================== //
-
+// src/themes/overrides/Button.ts
 import { Theme } from '@mui/material/styles';
 
 export default function Button(theme: Theme) {
-	const disabledStyle = {
-		'&.Mui-disabled': {
-			backgroundColor: theme.palette.grey[200]
-		}
-	};
-
 	return {
 		MuiButton: {
 			styleOverrides: {
 				root: {
-					fontWeight: 400,
-					boxShadow: 'none', // React 19 compatible: use styleOverrides instead of defaultProps
+					borderRadius: 8, // Soft rounded corners like the image
+					fontWeight: 600
+				},
+				contained: {
+					boxShadow: 'none',
 					'&:hover': {
 						boxShadow: 'none'
 					}
 				},
-				contained: {
-					...disabledStyle
-				},
-				outlined: {
-					...disabledStyle
+				sizeLarge: {
+					height: 48 // Taller buttons for "Add to Cart"
 				}
 			}
 		}

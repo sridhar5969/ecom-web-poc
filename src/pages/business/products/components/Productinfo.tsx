@@ -11,9 +11,9 @@ import AddIcon from '@mui/icons-material/Add';
 
 import { useAppDispatch } from '../../../../store/store';
 import { useNotification } from '../../../../hooks/useNotification';
-import { addToCart } from '../../../../store/slices/cart.slice';
 import { ProductDetail } from '../../../../types/product.types';
 import { getFallbackImage } from '../utils/getFallbackImage';
+import { useAddToCartMutation } from '../../../../store/api/business/cart.api';
 
 // Format money
 const formatMoney = (amount: number, currency?: string) =>
@@ -27,6 +27,7 @@ interface ProductInfoProps {
 }
 
 const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
+	const [addToCart, { isLoading }] = useAddToCartMutation();
 	const dispatch = useAppDispatch();
 	const { show } = useNotification();
 
@@ -61,25 +62,20 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 
 	const totalPrice = currentVariant.price_amount * quantity;
 
-	const handleAddToCart = () => {
-		dispatch(
-			addToCart({
-				variantId: currentVariant.id,
-				productId: product.id,
-				title: product.title,
-				variantName: currentVariant.name,
-				sku: currentVariant.sku,
-				price: currentVariant.price_amount,
-				image: normalizedImages[0].url,
-				quantity,
-				maxStock: currentVariant.stock_quantity || 10
-			})
-		);
+	const handleAddToCart = async () => {
+		if (!currentVariant.id) return show({ message: 'Please select a size', type: 'error' });
 
-		show({
-			message: `${product.title} added to cart!`,
-			type: 'success'
-		});
+		try {
+			await addToCart({
+				variantId: currentVariant.id,
+				quantity: quantity
+			}).unwrap();
+
+			show({ message: 'Added to cart!', type: 'success' });
+		} catch (error) {
+			console.error(error);
+			show({ message: 'Failed to add item', type: 'error' });
+		}
 	};
 
 	return (

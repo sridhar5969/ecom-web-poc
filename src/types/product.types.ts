@@ -8,7 +8,7 @@ import { z } from 'zod';
  *   ...otherFields
  * }
  */
-const base = <T extends z.ZodRawShape>(shape: T) =>
+export const base = <T extends z.ZodRawShape>(shape: T) =>
 	z.object({
 		...shape,
 		success: z.boolean(),

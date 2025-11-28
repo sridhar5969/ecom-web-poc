@@ -27,9 +27,8 @@ import {
 } from 'react-icons/md';
 import { useLogout } from '../../../hooks/useLogOut';
 import { useNavigate } from 'react-router-dom';
-import { selectCartTotalQty } from '../../../store/slices/cart.slice';
-import { useAppSelector } from '../../../store/store';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useGetCartQuery } from '../../../store/api/business/cart.api';
 
 interface ModernTopBarProps {
 	onMenuToggle: () => void;
@@ -38,7 +37,9 @@ interface ModernTopBarProps {
 
 const ModernTopBar = ({ onMenuToggle, drawerOpen }: ModernTopBarProps) => {
 	const navigate = useNavigate();
-	const totalQty = useAppSelector(selectCartTotalQty);
+	const { data: cartData } = useGetCartQuery();
+
+	const totalQty = cartData?.total_quantity || 0;
 	const theme = useTheme();
 
 	// 1. Get Session Data from Context

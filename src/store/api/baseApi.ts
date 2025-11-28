@@ -6,6 +6,7 @@ import { logger, logApiError } from '../../services/logger/logger.service';
 import { performanceMonitor } from '../../services/performance/performance.service';
 import { HTTP_STATUS } from '../../constants';
 import TokenStorage from '../../utils/TokenStorage';
+import { getOrCreateSessionId } from '../../utils/session';
 
 /**
  * Token refresh queue to prevent race conditions
@@ -20,6 +21,8 @@ export const rawBaseQuery = fetchBaseQuery({
 	baseUrl: env.API_BASE_URL,
 	credentials: env.VITE_AUTH_MODE === 'cookie' ? 'include' : 'omit',
 	prepareHeaders: headers => {
+		const sessionId = getOrCreateSessionId();
+		if (sessionId) headers.set('x-session-id', sessionId);
 		// Add Authorization header when in localStorage mode
 		if (env.VITE_AUTH_MODE === 'localStorage') {
 			const token = TokenStorage.getAccessToken();

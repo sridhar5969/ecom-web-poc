@@ -6,13 +6,14 @@
 
 import { authApi } from './auth/auth.api';
 import { sessionApi } from './auth/session.api';
+import { cartApi } from './business/cart.api';
 import { productApi } from './business/product.api';
 
 /**
  * Array of all API slices
  * Add new APIs here to automatically register their middleware and reducers
  */
-export const apiSlices = [authApi, sessionApi, productApi] as const;
+export const apiSlices = [authApi, sessionApi, productApi, cartApi] as const;
 
 /**
  * Type helper for API slices

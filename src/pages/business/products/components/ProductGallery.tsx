@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
+import { getFallbackImage } from '../utils/getFallbackImage';
 
 interface GalleryProps {
-	images: Array<{ id: string; url: string }>;
+	images?: Array<{ id: string; url: string }>;
 	title: string;
 }
 
 const ProductGallery: React.FC<GalleryProps> = ({ images, title }) => {
-	const [selectedImage, setSelectedImage] = useState(images[0]?.url);
+	//  Ensure we always have at least 3 images
+	const safeImages =
+		images?.length && images[0]?.url
+			? images
+			: [
+					{ id: 'fallback-1', url: getFallbackImage() },
+					{ id: 'fallback-2', url: getFallbackImage() },
+					{ id: 'fallback-3', url: getFallbackImage() }
+				];
+
+	const [selectedImage, setSelectedImage] = useState(safeImages[0].url);
 
 	return (
 		<Box>
@@ -28,6 +39,7 @@ const ProductGallery: React.FC<GalleryProps> = ({ images, title }) => {
 					component="img"
 					src={selectedImage}
 					alt={title}
+					onError={(e: any) => (e.target.src = getFallbackImage())}
 					sx={{
 						maxWidth: '100%',
 						maxHeight: '100%',
@@ -36,7 +48,7 @@ const ProductGallery: React.FC<GalleryProps> = ({ images, title }) => {
 				/>
 			</Box>
 
-			{/* Horizontal Thumbnails Strip */}
+			{/* Thumbnail Strip */}
 			<Box
 				sx={{
 					display: 'flex',
@@ -45,12 +57,10 @@ const ProductGallery: React.FC<GalleryProps> = ({ images, title }) => {
 					py: 1,
 					px: 0.5,
 					scrollbarWidth: 'none',
-					'&::-webkit-scrollbar': {
-						display: 'none'
-					}
+					'&::-webkit-scrollbar': { display: 'none' }
 				}}
 			>
-				{images.map(img => (
+				{safeImages.map(img => (
 					<Box
 						key={img.id}
 						onClick={() => setSelectedImage(img.url)}
@@ -63,7 +73,7 @@ const ProductGallery: React.FC<GalleryProps> = ({ images, title }) => {
 							border: selectedImage === img.url ? '2px solid #E53935' : '1px solid #ddd',
 							opacity: selectedImage === img.url ? 1 : 0.7,
 							transition: '0.2s',
-							flexShrink: 0, // Keeps them from shrinking → horizontal strip
+							flexShrink: 0,
 							'&:hover': { opacity: 1 }
 						}}
 					>
@@ -71,6 +81,7 @@ const ProductGallery: React.FC<GalleryProps> = ({ images, title }) => {
 							component="img"
 							src={img.url}
 							alt=""
+							onError={(e: any) => (e.target.src = getFallbackImage())}
 							sx={{
 								width: '100%',
 								height: '100%',

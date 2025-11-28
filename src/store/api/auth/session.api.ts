@@ -38,7 +38,7 @@ const { useUserSessionContextQuery } = sessionApi;
 
 const useSessionContextQuery = () => {
 	const query = useUserSessionContextQuery(null, {
-		skip: false, // ALWAYS run session on load
+		skip: true, // ALWAYS run session on load
 		refetchOnMountOrArgChange: false,
 		refetchOnReconnect: false
 	});

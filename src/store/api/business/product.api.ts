@@ -1,33 +1,36 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQuery } from '../baseApi';
-import { ProductDetail, ProductListResponse, ProductQueryParams } from '../../../types/product.types';
+import {
+	ProductDetail,
+	ProductDetailSchema,
+	ProductListResponse,
+	ProductListSchema,
+	ProductQueryParams
+} from '../../../types/product.types';
 
 export const productApi = createApi({
 	reducerPath: 'productApi',
-	baseQuery: baseQuery,
-	tagTypes: ['Products'],
+	baseQuery,
+	tagTypes: ['Products', 'ProductBySlug'],
 	endpoints: builder => ({
-		getProducts: builder.query<ProductListResponse, ProductQueryParams>({
+		getProductList: builder.query<ProductListResponse, ProductQueryParams>({
 			query: params => ({
 				url: 'products',
 				method: 'GET',
 				params
 			}),
-			providesTags: result =>
-				result
-					? [...result.items.map(({ id }) => ({ type: 'Products' as const, id })), { type: 'Products', id: 'LIST' }]
-					: [{ type: 'Products', id: 'LIST' }]
+			providesTags: ['Products'],
+			transformResponse: response => ProductListSchema.parse(response)
 		}),
 
-		getProduct: builder.query<ProductDetail, string>({
-			query: id => ({
-				url: `products/${id}`,
-				method: 'GET'
-			}),
-			providesTags: (result, error, id) => [{ type: 'Products', id }]
+		getProductBySlug: builder.query<ProductDetail, string>({
+			query: id => `products/${id}`,
+			providesTags: ['ProductBySlug'],
+			transformResponse: response => {
+				return ProductDetailSchema.parse(response).data;
+			}
 		}),
 
-		// Example of future mutation
 		deleteProduct: builder.mutation<void, string>({
 			query: id => ({
 				url: `products/${id}`,
@@ -38,4 +41,4 @@ export const productApi = createApi({
 	})
 });
 
-export const { useGetProductsQuery, useGetProductQuery, useDeleteProductMutation } = productApi;
+export const { useGetProductBySlugQuery, useGetProductListQuery, useDeleteProductMutation } = productApi;

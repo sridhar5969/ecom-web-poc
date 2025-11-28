@@ -133,10 +133,7 @@ const transformResponse = (
 			};
 		} else {
 			// Extract data from success response
-			return {
-				data: result.data.data ?? {},
-				meta: result.meta
-			};
+			return result;
 		}
 	}
 

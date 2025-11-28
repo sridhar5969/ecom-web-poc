@@ -3,7 +3,6 @@ import { Box } from '@mui/material';
 import BackdropLoader from '../../components/third-party/BackdropLoader';
 import SessionError from '../../pages/general/SessionError';
 import ModernTopBar from '../../components/common/TopBar/ModernTopBar';
-import TokenStorage from '../../utils/TokenStorage';
 import { useSessionContextQuery } from '../../store/api/auth/session.api';
 import { RoleProvider } from '../../contexts/RoleContext';
 

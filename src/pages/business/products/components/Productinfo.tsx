@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Typography, Chip, Rating, Divider, Stack, Button, IconButton, Grid } from '@mui/material';
+
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import ShareIcon from '@mui/icons-material/Share';
@@ -7,31 +8,60 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 import RemoveIcon from '@mui/icons-material/Remove';
 import AddIcon from '@mui/icons-material/Add';
+
 import { useAppDispatch } from '../../../../store/store';
 import { useNotification } from '../../../../hooks/useNotification';
 import { addToCart } from '../../../../store/slices/cart.slice';
-
 import { ProductDetail } from '../../../../types/product.types';
-import TokenStorage from '../../../../utils/TokenStorage';
-import { useNavigate } from 'react-router-dom';
-import { useRequireLogin } from '../../../../hooks/useRequireLogin';
+import { getFallbackImage } from '../utils/getFallbackImage';
 
-// Helper to format currency
-const formatMoney = (amount: number) =>
-	new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount / 100);
+// Format money
+const formatMoney = (amount: number, currency?: string) =>
+	new Intl.NumberFormat('en-US', {
+		style: 'currency',
+		currency: currency || 'USD'
+	}).format(amount / 100);
 
 interface ProductInfoProps {
 	product: ProductDetail;
 }
 
 const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
-	const navigate = useNavigate();
 	const dispatch = useAppDispatch();
 	const { show } = useNotification();
-	const requireLogin = useRequireLogin();
+
+	// Safe fallback images
+	const normalizedImages =
+		Array.isArray(product.images) && product.images.length > 0
+			? product.images
+			: [{ id: 'fallback-img', url: getFallbackImage(product) }];
+
+	// Safe fallback variants
+	const normalizedVariants =
+		Array.isArray(product.variants) && product.variants.length > 0
+			? product.variants
+			: [
+					{
+						id: 'fallback-var',
+						sku: 'N/A',
+						name: 'Default',
+						price_amount: product.price_summary?.base_amount ?? 0,
+						price_currency: product.price_summary?.currency ?? 'NGN',
+						stock_quantity: 1
+					}
+				];
+
+	// Always safe state
+	const [selectedVariantId, setSelectedVariantId] = useState<string>(normalizedVariants[0].id);
+	const [quantity, setQuantity] = useState(1);
+	const [deliveryType, setDeliveryType] = useState<'ship' | 'pickup'>('ship');
+
+	// Safe current variant
+	const currentVariant = normalizedVariants.find(v => v.id === selectedVariantId) || normalizedVariants[0];
+
+	const totalPrice = currentVariant.price_amount * quantity;
 
 	const handleAddToCart = () => {
-		console.log('added');
 		dispatch(
 			addToCart({
 				variantId: currentVariant.id,
@@ -40,32 +70,26 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 				variantName: currentVariant.name,
 				sku: currentVariant.sku,
 				price: currentVariant.price_amount,
-				image: product.images.find(img => img.is_primary)?.url || product.images[0].url,
-				quantity: quantity,
-				maxStock: currentVariant.stock_quantity
+				image: normalizedImages[0].url,
+				quantity,
+				maxStock: currentVariant.stock_quantity || 10
 			})
 		);
 
-		show({ message: `${product.title} added to cart!`, type: 'success' });
+		show({
+			message: `${product.title} added to cart!`,
+			type: 'success'
+		});
 	};
-	// 1. State for User Selections
-	const [selectedVariantId, setSelectedVariantId] = useState<string>(product.variants[0]?.id);
-	const [quantity, setQuantity] = useState(1);
-	const [deliveryType, setDeliveryType] = useState<'ship' | 'pickup'>('ship');
-
-	// 2. Derive Data based on selection
-	const currentVariant = product.variants.find(v => v.id === selectedVariantId) || product.variants[0];
-
-	const totalPrice = currentVariant.price_amount * quantity;
 
 	return (
 		<Box>
-			{/* Header Section */}
+			{/* Header */}
 			<Stack direction="row" justifyContent="space-between" alignItems="flex-start">
 				<Chip
-					label="Lush"
+					label={product.brand?.name}
 					sx={{
-						bgcolor: '#9C27B0', // TODO: should come from brand attributes
+						bgcolor: '#9C27B0',
 						color: 'white',
 						fontWeight: 'bold',
 						borderRadius: 1,
@@ -75,7 +99,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 				<Stack direction="row" alignItems="center" spacing={0.5}>
 					<CheckCircleIcon color="success" fontSize="small" />
 					<Typography variant="body2" color="success.main" fontWeight="600">
-						In Stock ({currentVariant.stock_quantity})
+						In Stock ({currentVariant.stock_quantity || 10})
 					</Typography>
 				</Stack>
 			</Stack>
@@ -87,7 +111,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 			<Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
 				<Rating value={product.average_rating || 4.5} readOnly precision={0.1} size="small" />
 				<Typography variant="body2" color="text.secondary">
-					4.7 (189 reviews)
+					{product.average_rating} ({product.reviews.review_count} reviews)
 				</Typography>
 			</Stack>
 
@@ -96,20 +120,21 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 			{/* Price Section */}
 			<Box sx={{ mb: 3 }}>
 				<Typography variant="h3" color="primary.main" fontWeight="800">
-					{formatMoney(currentVariant.price_amount)}
+					{formatMoney(currentVariant.price_amount, currentVariant.price_currency)}
 				</Typography>
-				<Typography variant="body2" color="success.main" fontWeight="500">
+				{/* <Typography variant="body2" color="success.main" fontWeight="500">
 					Earn {product.loyalty_points || 15} loyalty points
-				</Typography>
+				</Typography> */}
 			</Box>
 
-			{/* Variant Selector (Size) */}
+			{/* Variants */}
 			<Box sx={{ mb: 3 }}>
 				<Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
 					Size
 				</Typography>
+
 				<Stack direction="row" spacing={1.5} overflow="auto">
-					{product.variants.map(variant => {
+					{normalizedVariants.map(variant => {
 						const isSelected = variant.id === selectedVariantId;
 						return (
 							<Box
@@ -149,17 +174,19 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 						);
 					})}
 				</Stack>
+
 				<Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
 					SKU: {currentVariant.sku}
 				</Typography>
 			</Box>
 
-			{/* Delivery Options Box */}
+			{/* Delivery Options */}
 			<Box sx={{ border: '1px solid #E0E0E0', borderRadius: 2, p: 2, mb: 3 }}>
 				<Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 'bold' }}>
 					<LocalShippingOutlinedIcon fontSize="small" sx={{ verticalAlign: 'text-bottom', mr: 1 }} />
 					Delivery Options
 				</Typography>
+
 				<Grid container spacing={2}>
 					<Grid size={{ xs: 6 }}>
 						<Box
@@ -180,6 +207,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 							</Typography>
 						</Box>
 					</Grid>
+
 					<Grid size={{ xs: 6 }}>
 						<Box
 							onClick={() => setDeliveryType('pickup')}
@@ -223,7 +251,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 					</IconButton>
 				</Box>
 
-				{/* Total Price Label */}
+				{/* Total Price */}
 				<Box sx={{ display: { xs: 'none', md: 'block' }, minWidth: 100 }}>
 					<Typography variant="caption" display="block" color="text.secondary">
 						Total Price
@@ -240,7 +268,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 					size="large"
 					startIcon={<AddShoppingCartIcon />}
 					sx={{ flexGrow: 1, height: 48 }}
-					onClick={() => requireLogin(handleAddToCart)}
+					onClick={handleAddToCart}
 				>
 					Add to Cart
 				</Button>
@@ -249,6 +277,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 				<IconButton sx={{ border: '1px solid #E0E0E0', borderRadius: 1 }}>
 					<FavoriteBorderIcon />
 				</IconButton>
+
 				<IconButton sx={{ border: '1px solid #E0E0E0', borderRadius: 1 }}>
 					<ShareIcon />
 				</IconButton>

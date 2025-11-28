@@ -7,6 +7,7 @@ import {
 	ProductListSchema,
 	ProductQueryParams
 } from '../../../types/product.types';
+import z from 'zod';
 
 export const productApi = createApi({
 	reducerPath: 'productApi',
@@ -27,7 +28,13 @@ export const productApi = createApi({
 			query: id => `products/${id}`,
 			providesTags: ['ProductBySlug'],
 			transformResponse: response => {
-				return ProductDetailSchema.parse(response).data;
+				const data = ProductDetailSchema.safeParse(response);
+				if (!data.success) {
+					const error = z.prettifyError(data.error);
+					console.error(error);
+					throw new Error(`Response validation failed: ${JSON.stringify(error)}`);
+				}
+				return data.data.data;
 			}
 		}),
 

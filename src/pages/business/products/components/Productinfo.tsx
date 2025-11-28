@@ -48,7 +48,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 						name: 'Default',
 						price_amount: product.price_summary?.base_amount ?? 0,
 						price_currency: product.price_summary?.currency ?? 'NGN',
-						stock_quantity: 1
+						available_stock: 0
 					}
 				];
 
@@ -93,10 +93,20 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 					}}
 				/>
 				<Stack direction="row" alignItems="center" spacing={0.5}>
-					<CheckCircleIcon color="success" fontSize="small" />
-					<Typography variant="body2" color="success.main" fontWeight="600">
-						In Stock ({currentVariant.stock_quantity || 10})
-					</Typography>
+					{(currentVariant.available_stock ?? 0) > 0 ? (
+						<>
+							<CheckCircleIcon color="success" fontSize="small" />
+							<Typography variant="body2" color="success.main" fontWeight="600">
+								In Stock ({currentVariant.available_stock})
+							</Typography>
+						</>
+					) : (
+						<>
+							<Typography variant="body2" color="error.main" fontWeight="600">
+								Out of Stock
+							</Typography>
+						</>
+					)}
 				</Stack>
 			</Stack>
 
@@ -107,7 +117,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 			<Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
 				<Rating value={product.average_rating || 4.5} readOnly precision={0.1} size="small" />
 				<Typography variant="body2" color="text.secondary">
-					{product.average_rating} ({product.reviews.review_count} reviews)
+					{product.average_rating} ({product.review_count} reviews)
 				</Typography>
 			</Stack>
 

@@ -44,8 +44,9 @@ export const ProductListSchema = base({
 				name: z.string(),
 				slug: z.string()
 			}),
-
-			review_count: z.union([z.string(), z.number()]).optional(),
+			average_rating: z.number(),
+			review_count: z.number(),
+			available_stock: z.number().optional(),
 			created_at: z.string()
 		})
 	),
@@ -106,44 +107,14 @@ export const ProductDetailSchema = base({
 				price_currency: z.string(),
 				compare_at_amount: z.number().optional(),
 				cost_price_amount: z.number(),
-
-				attributes: z.object({
-					plant: z.string(),
-					mrpType: z.string(),
-					baseUnit: z.string(),
-					rawPrice: z.string(),
-					createdBy: z.string(),
-					priceUnit: z.number(),
-					lastChange: z.string(),
-					priceControl: z.string(),
-					valuationType: z.string(),
-					valuationClass: z.string(),
-					purchasingGroup: z.string()
-				}),
-
 				is_active: z.boolean(),
 				updated_at: z.string(),
-				images: z.array(z.any())
+				images: z.array(z.any()),
+				available_stock: z.number().optional()
 			})
 		),
-
-		reviews: z.object({
-			review_count: z.string()
-		}),
-		metadata: z.object({
-			plants: z.array(z.string()),
-			source: z.string(),
-			baseUnit: z.string(),
-			mrpTypes: z.array(z.string()),
-			currencies: z.array(z.string()),
-			priceUnits: z.array(z.number()),
-			lastSyncedAt: z.string(),
-			materialCode: z.string(),
-			materialType: z.string(),
-			abcIndicators: z.array(z.string()),
-			purchasingGroups: z.array(z.string())
-		}),
-
+		average_rating: z.number(),
+		review_count: z.number(),
 		created_at: z.string(),
 		updated_at: z.string()
 	})

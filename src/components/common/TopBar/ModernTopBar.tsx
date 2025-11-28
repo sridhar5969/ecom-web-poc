@@ -33,9 +33,10 @@ import { useGetCartQuery } from '../../../store/api/business/cart.api';
 interface ModernTopBarProps {
 	onMenuToggle: () => void;
 	drawerOpen: boolean;
+	title: string;
 }
 
-const ModernTopBar = ({ onMenuToggle, drawerOpen }: ModernTopBarProps) => {
+const ModernTopBar = ({ onMenuToggle, drawerOpen, title }: ModernTopBarProps) => {
 	const navigate = useNavigate();
 	const { data: cartData } = useGetCartQuery();
 
@@ -130,7 +131,7 @@ const ModernTopBar = ({ onMenuToggle, drawerOpen }: ModernTopBarProps) => {
 							letterSpacing: '-0.02em'
 						}}
 					>
-						{env.VITE_APP_NAME}
+						{title || env.VITE_APP_NAME}
 					</Typography>
 				</Stack>
 

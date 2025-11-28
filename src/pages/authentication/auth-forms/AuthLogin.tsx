@@ -21,6 +21,7 @@ import { useLoginUserMutation } from '../../../store/api/auth/auth.api';
 import Button from '../../../components/common/button/Button';
 import { displayValidationErrors } from '../../../utils/helpers';
 import { useAppDispatch } from '../../../store/store';
+import { useMergeCartMutation } from '../../../store/api/business/cart.api';
 
 interface FormValues {
 	email: string;
@@ -40,6 +41,7 @@ const AuthLogin = () => {
 	const dispatch = useAppDispatch();
 
 	const [loginUser] = useLoginUserMutation();
+	const [mergeCart] = useMergeCartMutation();
 
 	// React Hook Form setup
 	const {
@@ -65,14 +67,22 @@ const AuthLogin = () => {
 	const onSubmit = async (values: FormValues) => {
 		try {
 			setSubmitError('');
+			// Perform Login
 			await loginUser({
 				email: values.email,
 				password: values.password
 			}).unwrap();
-
-			// TODO: figure out how to do this more gracefully
+			// Perform Cart Merge
+			// the user should still be allowed to login (don't block entry).
+			try {
+				await mergeCart().unwrap();
+				console.log('Cart merged successfully');
+			} catch (mergeError) {
+				console.error('Cart merge failed:', mergeError);
+			}
+			// Using window.location.href forces a full reload, which ensures
+			// all RTK Query caches are cleared and sockets re-connected.
 			window.location.href = '/';
-			// navigate('/');
 		} catch (err: unknown) {
 			setSubmitError(err instanceof Error ? err.message : 'An error occurred');
 		}

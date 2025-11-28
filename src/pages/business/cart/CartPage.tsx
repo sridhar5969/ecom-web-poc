@@ -1,19 +1,15 @@
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Box, Container, Grid, Typography, Button, Paper, Divider, Stack } from '@mui/material';
+import { Box, Container, Grid, Typography, Button, Paper, Divider, Stack, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-
-// Store
 import {
-	selectCartItems,
-	selectCartTotalAmount,
-	removeFromCart,
-	updateQuantity
-} from '../../../store/slices/cart.slice';
-import { useNotification } from '../../../hooks/useNotification'; // Assuming hook exists
+	useGetCartQuery,
+	useUpdateCartItemMutation,
+	useRemoveCartItemMutation
+} from '../../../store/api/business/cart.api';
 
-// Components
+import { useNotification } from '../../../hooks/useNotification';
+
 import CartItem from './components/CartItem';
 import ModernTopBar from '../../../components/common/TopBar/ModernTopBar';
 
@@ -21,26 +17,56 @@ const formatMoney = (amount: number) =>
 	new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount / 100);
 
 const CartPage: React.FC = () => {
-	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const { show } = useNotification();
 
-	const cartItems = useSelector(selectCartItems);
-	const cartTotal = useSelector(selectCartTotalAmount);
+	// 1. Fetch Cart Data (Auto-refreshes on updates)
+	const { data: cartData, isLoading, isError } = useGetCartQuery();
 
-	const handleUpdateQty = (variantId: string, quantity: number) => {
-		dispatch(updateQuantity({ variantId, quantity }));
+	// 2. Mutations
+	const [updateItem] = useUpdateCartItemMutation();
+	const [removeItem] = useRemoveCartItemMutation();
+
+	const handleUpdateQty = async (variantId: string, quantity: number) => {
+		// if (quantity < 1) return; // Prevent going below 1 (unless you want that to mean delete)
+		try {
+			await updateItem({ variantId, quantity }).unwrap();
+		} catch (error) {
+			show({ message: 'Failed to update quantity', type: 'error' });
+		}
 	};
 
-	const handleRemove = (variantId: string) => {
-		dispatch(removeFromCart(variantId));
-		show({ message: 'Item removed from cart', type: 'info' });
+	const handleRemove = async (variantId: string) => {
+		try {
+			await removeItem(variantId).unwrap();
+			show({ message: 'Item removed from cart', type: 'info' });
+		} catch (error) {
+			show({ message: 'Failed to remove item', type: 'error' });
+		}
 	};
 
 	const handleCheckout = () => {
+		if (!cartData || cartData.items.length === 0) return;
 		show({ message: 'Proceeding to checkout...', type: 'success' });
 		navigate('/checkout');
 	};
+
+	// 3. Loading State
+	if (isLoading) {
+		return (
+			<Box sx={{ minHeight: '100vh', bgcolor: '#F4F6F8' }}>
+				<ModernTopBar title="Shopping Cart" />
+				<Box display="flex" justifyContent="center" alignItems="center" height="60vh">
+					<CircularProgress />
+				</Box>
+			</Box>
+		);
+	}
+
+	// 4. Extract data safely
+	const cartItems = cartData?.items || [];
+	const cartTotal = cartData?.grand_total || 0;
+	const isCartEmpty = !cartData || cartItems.length === 0;
 
 	return (
 		<Box sx={{ minHeight: '100vh', bgcolor: '#F4F6F8' }}>
@@ -51,7 +77,7 @@ const CartPage: React.FC = () => {
 					Continue Shopping
 				</Button>
 
-				{cartItems.length === 0 ? (
+				{isCartEmpty ? (
 					<Paper sx={{ p: 5, textAlign: 'center', borderRadius: 2 }}>
 						<Typography variant="h5" gutterBottom>
 							Your cart is empty
@@ -71,7 +97,7 @@ const CartPage: React.FC = () => {
 								<Box sx={{ p: 2, bgcolor: '#fff', borderBottom: '1px solid #eee' }}>
 									<Typography variant="h6">Cart Items ({cartItems.length})</Typography>
 								</Box>
-								{cartItems.map(item => (
+								{cartItems.map((item: any) => (
 									<CartItem key={item.variantId} item={item} onUpdateQty={handleUpdateQty} onRemove={handleRemove} />
 								))}
 							</Paper>

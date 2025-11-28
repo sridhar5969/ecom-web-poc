@@ -41,8 +41,23 @@ export const cartApi = createApi({
 				method: 'DELETE'
 			}),
 			invalidatesTags: ['Cart']
+		}),
+
+		// POST /api/cart/merge - Merge Guest Cart with User cart after login
+		mergeCart: builder.mutation<void, void>({
+			query: () => ({
+				url: 'cart/merge',
+				method: 'POST'
+			}),
+			invalidatesTags: ['Cart']
 		})
 	})
 });
 
-export const { useGetCartQuery, useAddToCartMutation, useUpdateCartItemMutation, useRemoveCartItemMutation } = cartApi;
+export const {
+	useGetCartQuery,
+	useAddToCartMutation,
+	useUpdateCartItemMutation,
+	useRemoveCartItemMutation,
+	useMergeCartMutation
+} = cartApi;

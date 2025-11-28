@@ -3,45 +3,39 @@ import { Outlet } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 import { Box, useMediaQuery } from '@mui/material';
 import Drawer from './Drawer';
-import TokenStorage from '../../utils/TokenStorage';
-import { useSessionContextQuery } from '../../store/api/auth/session.api';
-import BackdropLoader from '../../components/third-party/BackdropLoader';
-import SessionError from '../../pages/general/SessionError';
+import { useAuth } from '../../contexts/AuthContext';
 import { RoleProvider } from '../../contexts/RoleContext';
-import { useRole } from '../../contexts/useRole';
 import ModernTopBar from '../../components/common/TopBar/ModernTopBar';
 import Breadcrumbs from '../../components/common/breadcrumbs/Breadcrumbs';
 import { GlobalLoader } from '../../components/common/loading/GlobalLoader';
+import { SessionData } from '../../schemas';
 
+/**
+ * MainLayout - Simplified, uses AuthContext and RoleProvider
+ * Session is guaranteed to exist here because of ProtectedRoute wrapper
+ */
 const MainLayout = () => {
 	const theme = useTheme();
 	const matchDownLG = useMediaQuery(theme.breakpoints.down('lg'));
+	const { session } = useAuth();
 
-	// Use derived state for drawer open/closed based on screen size
-	const shouldBeOpen = useMemo(() => {
-		// On desktop (lg and above), drawer should be open by default
-		// On tablets/mobile (lg and below), drawer should be collapsed by default
-		return !matchDownLG;
-	}, [matchDownLG]);
-
-	// For manual toggling, we'll use a separate state
+	// Drawer state management
+	const shouldBeOpen = useMemo(() => !matchDownLG, [matchDownLG]);
 	const [manuallyToggled, setManuallyToggled] = useState(false);
-
-	// Determine final drawer state
 	const drawerOpen = manuallyToggled ? !shouldBeOpen : shouldBeOpen;
-
-	const { data, isLoading, isError, errorMessage } = useSessionContextQuery();
-
-	if (isLoading) return <BackdropLoader />;
-	if (isError || !data) return <SessionError errMsg={errorMessage} />;
 
 	const handleDrawerToggle = () => {
 		setManuallyToggled(!manuallyToggled);
 	};
 
+	// Session is guaranteed to exist here due to ProtectedRoute
+	if (!session) {
+		return null; // Should never happen
+	}
+
 	return (
-		<RoleProvider sessionData={data}>
-			<MainLayoutContent open={drawerOpen} handleDrawerToggle={handleDrawerToggle} data={data} />
+		<RoleProvider sessionData={session}>
+			<MainLayoutContent open={drawerOpen} handleDrawerToggle={handleDrawerToggle} session={session} />
 		</RoleProvider>
 	);
 };
@@ -49,14 +43,13 @@ const MainLayout = () => {
 const MainLayoutContent = ({
 	open,
 	handleDrawerToggle,
-	data
+	session
 }: {
 	open: boolean;
 	handleDrawerToggle: () => void;
-	data: unknown;
+	session: SessionData;
 }) => {
-	const { getCurrentPermissions } = useRole();
-	const permissions = getCurrentPermissions();
+	const permissions = session.permissions;
 
 	return (
 		<Box
@@ -67,7 +60,6 @@ const MainLayoutContent = ({
 				backgroundColor: '#fafafa'
 			}}
 		>
-			{/* Modern Top Bar */}
 			<ModernTopBar onMenuToggle={handleDrawerToggle} drawerOpen={open} />
 
 			<Box
@@ -112,11 +104,11 @@ const MainLayoutContent = ({
 								flexGrow: 1,
 								position: 'relative',
 								minHeight: 0,
-								overflow: 'visible' // ✅ FIXED
+								overflow: 'visible'
 							}}
 						>
 							<GlobalLoader />
-							<Outlet context={data} />
+							<Outlet />
 						</Box>
 					</Box>
 				</Box>

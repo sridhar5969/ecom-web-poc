@@ -1,80 +1,85 @@
-import { useCallback, useMemo } from 'react';
-import { RoleContextType, Role, RoleProviderProps } from './RoleContext.types';
-import { RoleContext } from './RoleContext.context';
+import { createContext, useContext, useMemo, ReactNode } from 'react';
+import type { SessionData } from '../schemas/session.schemas';
+import { getAllPermissions } from '../schemas/session.schemas';
+
+interface RoleContextValue {
+	// User info
+	userId: string | null;
+	userName: string;
+	userEmail: string | null;
+
+	// Role info
+	roleId: number | null;
+	roleName: string;
+
+	// Permissions
+	permissions: string[];
+	hasPermission: (permission: string) => boolean;
+	hasAnyPermission: (permissions: string[]) => boolean;
+	hasAllPermissions: (permissions: string[]) => boolean;
+
+	// State
+	isGuest: boolean;
+}
+
+const RoleContext = createContext<RoleContextValue | undefined>(undefined);
+
+interface RoleProviderProps {
+	children: ReactNode;
+	sessionData: SessionData | null;
+}
 
 /**
- * RoleProvider
- * Handles both authenticated users and guests (sessionData = null)
+ * RoleProvider - Simplified role and permission management
+ * Handles both authenticated users and guests
  */
 export const RoleProvider = ({ children, sessionData }: RoleProviderProps) => {
-	// 🔹 If sessionData is null → treat user as "guest"
 	const isGuest = !sessionData;
-	console.log(sessionData);
 
-	// -----------------------------
-	// ROLE
-	// -----------------------------
-	const currentRole: Role = useMemo(() => {
+	const value: RoleContextValue = useMemo(() => {
+		// Guest user
 		if (isGuest) {
 			return {
-				id: 0,
-				name: 'guest',
-				permissions: [] // No permissions for guests
+				userId: null,
+				userName: 'Guest',
+				userEmail: null,
+				roleId: null,
+				roleName: 'guest',
+				permissions: [],
+				hasPermission: () => false,
+				hasAnyPermission: () => false,
+				hasAllPermissions: () => false,
+				isGuest: true
 			};
 		}
 
-		return {
-			id: sessionData.id,
-			name: sessionData.name,
-			permissions: sessionData.permissions ?? []
-		};
-	}, [isGuest, sessionData]);
-
-	const availableRoles: Role[] = useMemo(() => [currentRole], [currentRole]);
-
-	// -----------------------------
-	// USER INFO
-	// -----------------------------
-	const userInfo = useMemo(() => {
-		if (isGuest) {
-			return {
-				id: null,
-				name: 'Guest',
-				email: null
-			};
-		}
+		// Authenticated user
+		const permissions = getAllPermissions(sessionData);
 
 		return {
-			id: sessionData.id,
-			name: sessionData.name,
-			email: sessionData.email
+			userId: sessionData.userId,
+			userName: sessionData.userName,
+			userEmail: sessionData.userEmail,
+			roleId: sessionData.roleId,
+			roleName: sessionData.roleName,
+			permissions,
+			hasPermission: (permission: string) => permissions.includes(permission),
+			hasAnyPermission: (perms: string[]) => perms.some(p => permissions.includes(p)),
+			hasAllPermissions: (perms: string[]) => perms.every(p => permissions.includes(p)),
+			isGuest: false
 		};
-	}, [isGuest, sessionData]);
-
-	// -----------------------------
-	// SWITCH ROLE (no-op, but safe)
-	// -----------------------------
-	const switchRole = useCallback((roleId: number) => {
-		// Only one role available — do nothing
-	}, []);
-
-	// -----------------------------
-	// PERMISSIONS
-	// -----------------------------
-	const getCurrentPermissions = useCallback(() => {
-		return currentRole.permissions;
-	}, [currentRole.permissions]);
-
-	// -----------------------------
-	// CONTEXT VALUE
-	// -----------------------------
-	const value: RoleContextType = {
-		currentRole,
-		availableRoles,
-		userInfo,
-		switchRole,
-		getCurrentPermissions
-	};
+	}, [sessionData, isGuest]);
 
 	return <RoleContext.Provider value={value}>{children}</RoleContext.Provider>;
+};
+
+/**
+ * useRole hook - Access role and permission information
+ */
+export const useRole = () => {
+	const context = useContext(RoleContext);
+	if (!context) {
+		throw new Error('useRole must be used within RoleProvider');
+	}
+	return context;
 };

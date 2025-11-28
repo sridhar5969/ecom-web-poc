@@ -8,18 +8,14 @@ import {
 	Menu,
 	MenuItem,
 	Avatar,
-	Chip,
 	Divider,
 	Tooltip,
 	Stack,
 	Badge,
-	useTheme,
-	FormControl,
-	Select
+	useTheme
 } from '@mui/material';
 import { env } from '../../../config/env';
 import {
-	MdMenu as MenuIcon,
 	MdLogout as Logout,
 	MdPerson as Person,
 	MdAdminPanelSettings as AdminPanelSettings,
@@ -29,11 +25,12 @@ import {
 	MdNotificationsNone as NotificationsNone,
 	MdShoppingCart
 } from 'react-icons/md';
-import { useRole } from '../../../contexts/useRole';
 import { useLogout } from '../../../hooks/useLogOut';
 import { useNavigate } from 'react-router-dom';
 import { selectCartTotalQty } from '../../../store/slices/cart.slice';
 import { useAppSelector } from '../../../store/store';
+import { useAuth } from '../../../contexts/AuthContext';
+
 interface ModernTopBarProps {
 	onMenuToggle: () => void;
 	drawerOpen: boolean;
@@ -43,10 +40,18 @@ const ModernTopBar = ({ onMenuToggle, drawerOpen }: ModernTopBarProps) => {
 	const navigate = useNavigate();
 	const totalQty = useAppSelector(selectCartTotalQty);
 	const theme = useTheme();
-	const { currentRole, availableRoles, userInfo, switchRole } = useRole();
+
+	// 1. Get Session Data from Context
+	const { session, isAuthenticated } = useAuth();
 	const logout = useLogout();
 
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+	// 2. Derived state for UI safety
+	const userName = session?.userName || 'Guest';
+	const userEmail = session?.userEmail || '';
+	const roleName = session?.roleName || 'guest';
+	const permissionsCount = session?.permissions?.length || 0;
 
 	const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
 		setAnchorEl(event.currentTarget);
@@ -56,47 +61,41 @@ const ModernTopBar = ({ onMenuToggle, drawerOpen }: ModernTopBarProps) => {
 		setAnchorEl(null);
 	};
 
-	const handleRoleChange = (roleId: number) => {
-		switchRole(roleId);
-		handleMenuClose();
-	};
-
-	const getRoleIcon = (roleName: string) => {
+	const getRoleIcon = (role: string) => {
 		const iconStyle = { fontSize: 18 };
-		switch (roleName.toLowerCase()) {
-			case 'dev_admin':
+		// Normalize role string to handle casing
+		switch (role?.toLowerCase()) {
 			case 'admin':
+			case 'dev_admin':
 				return <AdminPanelSettings style={iconStyle} />;
-			case 'supervisor':
 			case 'manager':
+			case 'supervisor':
 				return <SupervisorAccount style={iconStyle} />;
 			case 'security':
 				return <Security style={iconStyle} />;
+			case 'customer':
 			default:
 				return <Person style={iconStyle} />;
 		}
 	};
 
-	const getRoleColor = (roleName: string) => {
-		switch (roleName.toLowerCase()) {
-			case 'dev_admin':
-				return '#f44336';
+	const getRoleColor = (role: string) => {
+		switch (role?.toLowerCase()) {
 			case 'admin':
-				return '#9c27b0';
-			case 'production':
-				return '#2196f3';
-			case 'supervisor':
+			case 'dev_admin':
+				return '#f44336'; // Red
 			case 'manager':
-				return '#00bcd4';
-			case 'security':
-				return '#ff9800';
+				return '#00bcd4'; // Cyan
+			case 'customer':
+				return '#2196f3'; // Blue
 			default:
-				return '#757575';
+				return '#757575'; // Grey
 		}
 	};
 
-	const getRoleDisplayName = (roleName: string) => {
-		return roleName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+	const getRoleDisplayName = (role: string) => {
+		if (!role) return 'Guest';
+		return role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 	};
 
 	return (
@@ -118,26 +117,8 @@ const ModernTopBar = ({ onMenuToggle, drawerOpen }: ModernTopBarProps) => {
 					justifyContent: 'space-between'
 				}}
 			>
-				{/* Left Section - Menu Toggle & Logo */}
+				{/* Left Section - Logo */}
 				<Stack direction="row" alignItems="center" spacing={{ xs: 1.5, sm: 2 }}>
-					{/* <IconButton
-						onClick={onMenuToggle}
-						sx={{
-							color: '#1a1a1a',
-							backgroundColor: drawerOpen ? 'rgba(0, 0, 0, 0.04)' : 'transparent',
-							'&:hover': {
-								backgroundColor: 'rgba(0, 0, 0, 0.08)',
-								transform: 'scale(1.05)'
-							},
-							transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-							borderRadius: '12px',
-							width: { xs: 36, md: 40 },
-							height: { xs: 36, md: 40 }
-						}}
-					>
-						<MenuIcon style={{ fontSize: 18 }} />
-					</IconButton> */}
-
 					<Typography
 						variant="h6"
 						component="div"
@@ -160,6 +141,7 @@ const ModernTopBar = ({ onMenuToggle, drawerOpen }: ModernTopBarProps) => {
 							<MdShoppingCart />
 						</Badge>
 					</IconButton>
+
 					{/* Notifications */}
 					<Tooltip title="Notifications">
 						<IconButton
@@ -181,7 +163,7 @@ const ModernTopBar = ({ onMenuToggle, drawerOpen }: ModernTopBarProps) => {
 						</IconButton>
 					</Tooltip>
 
-					{/* User Profile */}
+					{/* User Profile Trigger */}
 					<Tooltip title="Account Settings">
 						<IconButton
 							onClick={handleProfileMenuOpen}
@@ -207,7 +189,7 @@ const ModernTopBar = ({ onMenuToggle, drawerOpen }: ModernTopBarProps) => {
 									transition: 'all 0.15s ease'
 								}}
 							>
-								{userInfo.name.charAt(0).toUpperCase()}
+								{userName.charAt(0).toUpperCase()}
 							</Avatar>
 						</IconButton>
 					</Tooltip>
@@ -245,14 +227,14 @@ const ModernTopBar = ({ onMenuToggle, drawerOpen }: ModernTopBarProps) => {
 											border: '1px solid rgba(0, 0, 0, 0.08)'
 										}}
 									>
-										{userInfo.name.charAt(0).toUpperCase()}
+										{userName.charAt(0).toUpperCase()}
 									</Avatar>
 									<Box sx={{ flexGrow: 1, minWidth: 0 }}>
 										<Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
-											{userInfo.name}
+											{userName}
 										</Typography>
 										<Typography variant="body2" sx={{ color: '#666666', fontSize: '0.875rem' }}>
-											{userInfo.email}
+											{userEmail}
 										</Typography>
 									</Box>
 								</Stack>
@@ -261,198 +243,83 @@ const ModernTopBar = ({ onMenuToggle, drawerOpen }: ModernTopBarProps) => {
 							<Divider sx={{ borderColor: 'rgba(0, 0, 0, 0.06)' }} />
 
 							{/* Current Role Display */}
-							<Box sx={{ p: 2, pt: 2.5 }}>
-								<Typography
-									variant="caption"
-									sx={{ color: '#666666', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}
-								>
-									Current Role
-								</Typography>
-								<Box sx={{ mt: 1.5, p: 2, backgroundColor: 'rgba(0, 0, 0, 0.02)', borderRadius: '12px' }}>
-									<Stack direction="row" alignItems="center" spacing={2}>
-										<Box
-											sx={{
-												width: 32,
-												height: 32,
-												borderRadius: '8px',
-												backgroundColor: getRoleColor(currentRole.name) + '15',
-												display: 'flex',
-												alignItems: 'center',
-												justifyContent: 'center',
-												color: getRoleColor(currentRole.name)
-											}}
-										>
-											{getRoleIcon(currentRole.name)}
-										</Box>
-										<Box sx={{ flexGrow: 1 }}>
-											<Typography variant="body2" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
-												{getRoleDisplayName(currentRole.name)}
-											</Typography>
-											<Typography variant="caption" sx={{ color: '#666666' }}>
-												{currentRole.permissions.length} permissions
-											</Typography>
-										</Box>
-									</Stack>
-								</Box>
-							</Box>
-
-							{/* Role Switching Section */}
-							{availableRoles.length > 1 && (
-								<>
-									<Divider sx={{ borderColor: 'rgba(0, 0, 0, 0.06)' }} />
-									<Box sx={{ p: 2 }}>
-										<Typography
-											variant="caption"
-											sx={{
-												color: '#666666',
-												fontWeight: 500,
-												textTransform: 'uppercase',
-												letterSpacing: '0.5px',
-												mb: 1.5,
-												display: 'block'
-											}}
-										>
-											Switch Role
-										</Typography>
-										<FormControl fullWidth size="small">
-											<Select
-												value={currentRole.id}
-												onChange={e => handleRoleChange(Number(e.target.value))}
-												displayEmpty
+							{isAuthenticated && (
+								<Box sx={{ p: 2, pt: 2.5 }}>
+									<Typography
+										variant="caption"
+										sx={{ color: '#666666', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px' }}
+									>
+										Current Role
+									</Typography>
+									<Box sx={{ mt: 1.5, p: 2, backgroundColor: 'rgba(0, 0, 0, 0.02)', borderRadius: '12px' }}>
+										<Stack direction="row" alignItems="center" spacing={2}>
+											<Box
 												sx={{
-													borderRadius: '12px',
-													backgroundColor: 'rgba(0, 0, 0, 0.02)',
-													'& .MuiOutlinedInput-notchedOutline': {
-														border: '1px solid rgba(0, 0, 0, 0.08)',
-														borderRadius: '12px'
-													},
-													'&:hover .MuiOutlinedInput-notchedOutline': {
-														borderColor: 'rgba(0, 0, 0, 0.15)'
-													},
-													'&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-														borderColor: '#6366f1',
-														borderWidth: '2px'
-													}
-												}}
-												MenuProps={{
-													PaperProps: {
-														sx: {
-															borderRadius: '12px',
-															boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-															border: '1px solid rgba(0, 0, 0, 0.08)',
-															mt: 1
-														}
-													}
+													width: 32,
+													height: 32,
+													borderRadius: '8px',
+													backgroundColor: getRoleColor(roleName) + '15',
+													display: 'flex',
+													alignItems: 'center',
+													justifyContent: 'center',
+													color: getRoleColor(roleName)
 												}}
 											>
-												{availableRoles.map((role: typeof currentRole) => (
-													<MenuItem
-														key={role.id}
-														value={role.id}
-														sx={{
-															py: 1.5,
-															px: 2,
-															borderRadius: '8px',
-															mx: 1,
-															my: 0.5,
-															'&:hover': {
-																backgroundColor: 'rgba(99, 102, 241, 0.08)'
-															},
-															'&.Mui-selected': {
-																backgroundColor: 'rgba(99, 102, 241, 0.12)',
-																'&:hover': {
-																	backgroundColor: 'rgba(99, 102, 241, 0.16)'
-																}
-															}
-														}}
-													>
-														<Stack direction="row" alignItems="center" spacing={2} sx={{ width: '100%' }}>
-															<Box
-																sx={{
-																	width: 32,
-																	height: 32,
-																	borderRadius: '8px',
-																	backgroundColor: getRoleColor(role.name) + '15',
-																	display: 'flex',
-																	alignItems: 'center',
-																	justifyContent: 'center',
-																	color: getRoleColor(role.name)
-																}}
-															>
-																{getRoleIcon(role.name)}
-															</Box>
-															<Box sx={{ flexGrow: 1 }}>
-																<Typography variant="body2" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
-																	{getRoleDisplayName(role.name)}
-																</Typography>
-																<Typography variant="caption" sx={{ color: '#666666' }}>
-																	{role.permissions.length} permissions
-																</Typography>
-															</Box>
-															{role.id === currentRole.id && (
-																<Chip
-																	label="Active"
-																	size="small"
-																	sx={{
-																		backgroundColor: getRoleColor(role.name),
-																		color: 'white',
-																		fontSize: '0.75rem',
-																		height: 20,
-																		fontWeight: 500
-																	}}
-																/>
-															)}
-														</Stack>
-													</MenuItem>
-												))}
-											</Select>
-										</FormControl>
+												{getRoleIcon(roleName)}
+											</Box>
+											<Box sx={{ flexGrow: 1 }}>
+												<Typography variant="body2" sx={{ fontWeight: 600, color: '#1a1a1a' }}>
+													{getRoleDisplayName(roleName)}
+												</Typography>
+												<Typography variant="caption" sx={{ color: '#666666' }}>
+													{permissionsCount} permissions granted
+												</Typography>
+											</Box>
+										</Stack>
 									</Box>
-								</>
+								</Box>
 							)}
 
 							<Divider sx={{ borderColor: 'rgba(0, 0, 0, 0.06)' }} />
 
 							{/* Menu Actions */}
 							<Box sx={{ p: 1 }}>
-								{[
-									<MenuItem
-										key="settings"
-										sx={{
-											p: 1.5,
-											borderRadius: '12px',
-											'&:hover': {
-												backgroundColor: 'rgba(0, 0, 0, 0.04)'
-											}
-										}}
-									>
-										<Stack direction="row" alignItems="center" spacing={2}>
-											<Settings style={{ fontSize: 20, color: '#666666' }} />
-											<Typography variant="body2" sx={{ color: '#1a1a1a' }}>
-												Settings
-											</Typography>
-										</Stack>
-									</MenuItem>,
+								<MenuItem
+									key="settings"
+									onClick={handleMenuClose}
+									sx={{
+										p: 1.5,
+										borderRadius: '12px',
+										'&:hover': { backgroundColor: 'rgba(0, 0, 0, 0.04)' }
+									}}
+								>
+									<Stack direction="row" alignItems="center" spacing={2}>
+										<Settings style={{ fontSize: 20, color: '#666666' }} />
+										<Typography variant="body2" sx={{ color: '#1a1a1a' }}>
+											Settings
+										</Typography>
+									</Stack>
+								</MenuItem>
 
-									<MenuItem
-										key="logout"
-										onClick={logout}
-										sx={{
-											p: 1.5,
-											borderRadius: '12px',
-											'&:hover': {
-												backgroundColor: 'rgba(244, 67, 54, 0.08)'
-											}
-										}}
-									>
-										<Stack direction="row" alignItems="center" spacing={2}>
-											<Logout style={{ fontSize: 20, color: '#f44336' }} />
-											<Typography variant="body2" sx={{ color: '#f44336', fontWeight: 500 }}>
-												Sign Out
-											</Typography>
-										</Stack>
-									</MenuItem>
-								]}
+								<MenuItem
+									key="logout"
+									onClick={() => {
+										logout();
+										handleMenuClose();
+									}}
+									sx={{
+										p: 1.5,
+										borderRadius: '12px',
+										'&:hover': { backgroundColor: 'rgba(244, 67, 54, 0.08)' }
+									}}
+								>
+									<Stack direction="row" alignItems="center" spacing={2}>
+										<Logout style={{ fontSize: 20, color: '#f44336' }} />
+										<Typography variant="body2" sx={{ color: '#f44336', fontWeight: 500 }}>
+											Sign Out
+										</Typography>
+									</Stack>
+								</MenuItem>
 							</Box>
 						</Box>
 					</Menu>

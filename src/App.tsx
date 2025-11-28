@@ -8,9 +8,10 @@ import ScrollTop from './components/common/ScrollTop';
 import { NotificationProvider } from './services/notifications/NotificationProvider';
 import { NotificationContainer } from './services/notifications/NotificationContainer';
 import { LoadingProvider } from './services/loading/LoadingProvider';
+import { AuthGuard } from './components/AuthGuard';
+import { routes } from './routes';
 
 import './App.css';
-import { useAuthRoutes } from './hooks/useAuthRoutes';
 
 // ==============================|| APP - THEME, ROUTER, LOCAL  ||============================== //
 
@@ -20,9 +21,12 @@ const App = () => {
 			<LocalizationProvider dateAdapter={AdapterDayjs}>
 				<LoadingProvider>
 					<NotificationProvider>
-						<ScrollTop>
-							<Routes />
-						</ScrollTop>
+						{/* AuthGuard with requireAuth=false provides context without blocking */}
+						<AuthGuard requireAuth={false}>
+							<ScrollTop>
+								<Routes />
+							</ScrollTop>
+						</AuthGuard>
 						<NotificationContainer />
 					</NotificationProvider>
 				</LoadingProvider>
@@ -32,8 +36,7 @@ const App = () => {
 };
 
 const Routes = () => {
-	const r = useAuthRoutes();
-	return useRoutes(r);
+	return useRoutes(routes);
 };
 
 export default App;

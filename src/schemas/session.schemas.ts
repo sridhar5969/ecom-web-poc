@@ -1,43 +1,32 @@
-/**
- * Session-related Zod schemas
- * Matches backend session structure with flat permissions and roleId/roleName
- */
-
-import { z } from 'zod/v4';
+import { z } from 'zod';
 
 /**
- * Session data schema matching backend structure
- * Backend returns: { id: string, name: string, email: string, roleId: number, roleName: string, permissions: string[] }
+ * Session data schema matching the NEW backend structure
+ * Backend returns: { userId, userName, userEmail, roleId, roleName, permissions, isGuest }
  */
 export const sessionDataSchema = z.object({
-	id: z.string(),
-	name: z.string().min(1),
-	email: z.string().email(),
-	role: z.enum(['admin', 'manager', 'customer']),
+	// Use nullable() because 'Guest' users have null IDs and Emails
+	userId: z.string().nullable(),
+	userName: z.string(),
+	userEmail: z.string().email().nullable(),
+
+	// Role ID is null for enum-based roles in your system
+	roleId: z.number().nullable(),
+
+	// Use z.string() or a specific enum if you want strict validation on specific role names
+	roleName: z.enum(['admin', 'manager', 'customer', 'guest']),
+
 	permissions: z.array(z.string()),
-	primaryAuthMethod: z.string().nullable(),
-	emailVerifiedAt: z.string().nullable(),
-	phoneVerifiedAt: z.string().nullable()
+
+	// New field indicating guest status
+	isGuest: z.boolean()
 });
-/**
- * Type inference from schemas
- */
+
 export type SessionData = z.infer<typeof sessionDataSchema>;
 
 /**
  * Helper function to extract all permissions from session data
- * Note: Backend returns flat permissions array, so just return it directly
  */
 export const getAllPermissions = (sessionData: SessionData): string[] => {
-	return sessionData.permissions;
+	return sessionData.permissions || [];
 };
-
-/**
- * Role type for backward compatibility (if needed elsewhere)
- * Note: Backend doesn't return role objects, only roleId and roleName
- */
-export interface Role {
-	id: number;
-	name: string;
-	permissions: string[];
-}

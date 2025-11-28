@@ -1,21 +1,29 @@
-import { createContext, useContext } from 'react';
-import { useUserSessionContextQuery } from '../store/api/auth/session.api';
+import { createContext, useContext, ReactNode } from 'react';
+import type { SessionData } from '../schemas/session.schemas';
 
-const AuthContext = createContext({
-	data: null,
-	isLoading: true,
-	isError: false,
-	errorMessage: null
-});
+interface AuthContextValue {
+	session: SessionData | null;
+	isLoading: boolean;
+	isError: boolean;
+	errorMessage?: string;
+	isAuthenticated: boolean;
+}
 
-export const AuthProvider = ({ children }) => {
-	const session = useUserSessionContextQuery(null, {
-		skip: false, // ALWAYS attempt, backend handles cookies
-		refetchOnMountOrArgChange: false,
-		refetchOnReconnect: false
-	});
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-	return <AuthContext.Provider value={session}>{children}</AuthContext.Provider>;
+export const useAuth = () => {
+	const context = useContext(AuthContext);
+	if (!context) {
+		throw new Error('useAuth must be used within AuthProvider');
+	}
+	return context;
 };
 
-export const useAuth = () => useContext(AuthContext);
+interface AuthProviderProps {
+	children: ReactNode;
+	value: AuthContextValue;
+}
+
+export const AuthProvider = ({ children, value }: AuthProviderProps) => {
+	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};

@@ -20,6 +20,7 @@ import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
 import { useLoginUserMutation } from '../../../store/api/auth/auth.api';
 import Button from '../../../components/common/button/Button';
 import { displayValidationErrors } from '../../../utils/helpers';
+import { useAppDispatch } from '../../../store/store';
 
 interface FormValues {
 	email: string;
@@ -36,6 +37,7 @@ const AuthLogin = () => {
 	const [showPassword, setShowPassword] = useState(false);
 	const [submitError, setSubmitError] = useState<string>('');
 	const navigate = useNavigate();
+	const dispatch = useAppDispatch();
 
 	const [loginUser] = useLoginUserMutation();
 
@@ -67,7 +69,10 @@ const AuthLogin = () => {
 				email: values.email,
 				password: values.password
 			}).unwrap();
-			navigate('/');
+
+			// TODO: figure out how to do this more gracefully
+			window.location.href = '/';
+			// navigate('/');
 		} catch (err: unknown) {
 			setSubmitError(err instanceof Error ? err.message : 'An error occurred');
 		}

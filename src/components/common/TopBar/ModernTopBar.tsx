@@ -23,7 +23,8 @@ import {
 	MdSupervisorAccount as SupervisorAccount,
 	MdSettings as Settings,
 	MdNotificationsNone as NotificationsNone,
-	MdShoppingCart
+	MdShoppingCart,
+	MdFavorite
 } from 'react-icons/md';
 import { useLogout } from '../../../hooks/useLogOut';
 import { useNavigate } from 'react-router-dom';
@@ -138,11 +139,21 @@ const ModernTopBar = ({ onMenuToggle, drawerOpen, title }: ModernTopBarProps) =>
 				{/* Right Section - Notifications & User Profile */}
 				<Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1, md: 1 }}>
 					{/* Cart Icon */}
-					<IconButton onClick={() => navigate('/cart')}>
-						<Badge badgeContent={totalQty} color="error">
-							<MdShoppingCart />
-						</Badge>
-					</IconButton>
+					<Tooltip title="View Wishlists">
+						<IconButton onClick={() => navigate('/wishlist')}>
+							<Badge color="error">
+								<MdFavorite />
+							</Badge>
+						</IconButton>
+					</Tooltip>
+
+					<Tooltip title="View Cart">
+						<IconButton onClick={() => navigate('/cart')}>
+							<Badge badgeContent={totalQty} color="error">
+								<MdShoppingCart />
+							</Badge>
+						</IconButton>
+					</Tooltip>
 
 					{/* Notifications */}
 					<Tooltip title="Notifications">

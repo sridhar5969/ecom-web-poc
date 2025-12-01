@@ -1,8 +1,7 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
-import { rawBaseQuery } from '../baseApi';
 import { logger } from '../../../services/logger/logger.service';
 import { env } from '../../../config/env';
 import TokenStorage from '../../../utils/TokenStorage';
+import { rootApi } from '..';
 
 /**
  * Login response type
@@ -18,9 +17,7 @@ export type LoginRes = Record<string, never> | { accessToken: string; refreshTok
  */
 export type LogoutRes = Record<string, never>;
 
-export const authApi = createApi({
-	reducerPath: 'authApi',
-	baseQuery: rawBaseQuery,
+export const authApi = rootApi.injectEndpoints({
 	endpoints: builder => ({
 		loginUser: builder.mutation<LoginRes, { email: string; password: string }>({
 			query(data) {

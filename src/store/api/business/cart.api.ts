@@ -1,11 +1,7 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
-import { baseQuery } from '../baseApi';
 import { AddToCartRequest, AddToCartResponse, CartResponse, UpdateCartRequest } from '../../../types/cart.types';
+import { rootApi } from '..';
 
-export const cartApi = createApi({
-	reducerPath: 'cartApi',
-	baseQuery,
-	tagTypes: ['Cart'],
+export const cartApi = rootApi.injectEndpoints({
 	endpoints: builder => ({
 		// GET /api/cart
 		// Returns CartResponse (the inner data object with items, subtotal, etc.)

@@ -4,6 +4,7 @@ import MinimalLayout from '../../layouts/MinimalLayout';
 import ProductList from '../../pages/business/products';
 import ProductDetailsPage from '../../pages/business/products/ProductDetails';
 import CartPage from '../../pages/business/cart';
+import WishlistPage from '../../pages/business/wishlist/WishlistPage';
 
 export const StorefrontRoutes = {
 	path: '/',
@@ -12,6 +13,7 @@ export const StorefrontRoutes = {
 		// { index: true, element: <HomePage /> },
 		{ path: 'products', element: <ProductList /> },
 		{ path: 'products/:id', element: <ProductDetailsPage /> },
-		{ path: 'cart', element: <CartPage /> }
+		{ path: 'cart', element: <CartPage /> },
+		{ path: 'wishlist', element: <WishlistPage /> }
 	]
 };

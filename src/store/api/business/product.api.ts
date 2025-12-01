@@ -1,5 +1,3 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
-import { baseQuery } from '../baseApi';
 import {
 	ProductDetail,
 	ProductDetailSchema,
@@ -8,11 +6,9 @@ import {
 	ProductQueryParams
 } from '../../../types/product.types';
 import z from 'zod';
+import { rootApi } from '..';
 
-export const productApi = createApi({
-	reducerPath: 'productApi',
-	baseQuery,
-	tagTypes: ['Products', 'ProductBySlug'],
+export const productApi = rootApi.injectEndpoints({
 	endpoints: builder => ({
 		getProductList: builder.query<ProductListResponse, ProductQueryParams>({
 			query: params => ({

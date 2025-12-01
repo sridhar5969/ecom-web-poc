@@ -1,21 +1,11 @@
-/**
- * Central API registry
- * Import all RTK Query API slices here for auto-discovery
- * This ensures middleware and reducers are automatically registered
- */
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { baseQuery } from './baseApi';
 
-import { authApi } from './auth/auth.api';
-import { sessionApi } from './auth/session.api';
-import { cartApi } from './business/cart.api';
-import { productApi } from './business/product.api';
+export const rootApi = createApi({
+	reducerPath: 'api',
+	baseQuery,
+	tagTypes: ['Auth', 'Session', 'Cart', 'Products', 'ProductBySlug', 'Wishlists', 'Orders'],
+	endpoints: () => ({}) // Empty, will be extended later
+});
 
-/**
- * Array of all API slices
- * Add new APIs here to automatically register their middleware and reducers
- */
-export const apiSlices = [authApi, sessionApi, productApi, cartApi] as const;
-
-/**
- * Type helper for API slices
- */
-export type ApiSlice = (typeof apiSlices)[number];
+export const apiSlices = [rootApi] as const;

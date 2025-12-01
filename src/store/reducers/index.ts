@@ -2,7 +2,6 @@ import { combineReducers, AnyAction } from 'redux';
 import { LOGOUT, AuthActionTypes } from './actions';
 import TokenStorage from '../../utils/TokenStorage';
 import { apiSlices } from '../api';
-import cartReducer from '../slices/cart.slice';
 
 // Auto-discover and register all API reducers
 const apiReducers = apiSlices.reduce(
@@ -15,8 +14,7 @@ const apiReducers = apiSlices.reduce(
 
 // Combine ALL reducers from imported slices
 const rootReducer = combineReducers({
-	...apiReducers,
-	cart: cartReducer
+	...apiReducers
 });
 
 // Handle the LOGOUT action

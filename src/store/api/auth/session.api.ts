@@ -1,14 +1,10 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
 import { sessionDataSchema, type SessionData } from '../../../schemas/session.schemas';
-import { baseQuery } from '../baseApi';
 import { logger } from '../../../services/logger/logger.service';
 import { CACHE_DURATION } from '../../../constants';
 import type { ErrorResponse } from '../../../types/api.types';
+import { rootApi } from '..';
 
-export const sessionApi = createApi({
-	reducerPath: 'sessionApi',
-	baseQuery,
-	tagTypes: ['Session'],
+export const sessionApi = rootApi.injectEndpoints({
 	endpoints: builder => ({
 		userSessionContext: builder.query<SessionData | null, void>({
 			query: () => '/session', // Ensure this matches your backend route

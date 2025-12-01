@@ -9,12 +9,12 @@ import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined
 import RemoveIcon from '@mui/icons-material/Remove';
 import AddIcon from '@mui/icons-material/Add';
 
-import { useAppDispatch } from '../../../../store/store';
 import { useNotification } from '../../../../hooks/useNotification';
 import { ProductDetail } from '../../../../types/product.types';
 import { getFallbackImage } from '../utils/getFallbackImage';
 import { useAddToCartMutation } from '../../../../store/api/business/cart.api';
 import useIsMobile from '../../../../hooks/useIsMobile';
+import { useAddToWishlistMutation, useGetWishlistsQuery } from '../../../../store/api/business/wishlists.api';
 
 // Format money
 const formatMoney = (amount: number, currency?: string) =>
@@ -29,7 +29,9 @@ interface ProductInfoProps {
 
 const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 	const [addToCart, { isLoading }] = useAddToCartMutation();
-	const dispatch = useAppDispatch();
+	const [addToWishlist, { isError }] = useAddToWishlistMutation();
+	const { data: wishlists = [] } = useGetWishlistsQuery();
+	const defaultWishlistId = wishlists?.data?.[0]?.id;
 	const { show } = useNotification();
 
 	// Safe fallback images
@@ -77,6 +79,26 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 		} catch (error) {
 			console.error(error);
 			show({ message: 'Failed to add item', type: 'error' });
+		}
+	};
+
+	const handleAddToWishlist = async () => {
+		if (!currentVariant.id) return show({ message: 'Please select a size', type: 'error' });
+
+		if (!defaultWishlistId) {
+			return show({ message: 'Wishlist not loaded yet', type: 'error' });
+		}
+
+		try {
+			await addToWishlist({
+				wishlistId: defaultWishlistId,
+				variantId: currentVariant.id,
+				priority: 1
+			}).unwrap();
+
+			show({ message: 'Added to wishlist!', type: 'success' });
+		} catch {
+			show({ message: 'Failed to add to wishlist', type: 'error' });
 		}
 	};
 
@@ -282,7 +304,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 
 				{/* Secondary Actions */}
 				<IconButton sx={{ border: '1px solid #E0E0E0', borderRadius: 1 }}>
-					<FavoriteBorderIcon />
+					<FavoriteBorderIcon onClick={handleAddToWishlist} />
 				</IconButton>
 
 				<IconButton sx={{ border: '1px solid #E0E0E0', borderRadius: 1 }}>

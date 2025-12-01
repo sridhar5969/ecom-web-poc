@@ -3,6 +3,7 @@ import { Card, CardContent, CardMedia, Typography, Box, Chip, Stack, Rating } fr
 
 import { ProductListItem } from '../../../../types/product.types';
 import { getFallbackImage } from '../utils/getFallbackImage';
+import useIsMobile from '../../../../hooks/useIsMobile';
 
 // Format helper (price_amount is integer cents)
 const formatCurrency = (amount: number, currency: string) =>
@@ -19,6 +20,7 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
 	const compare = Number(product.compare_at_amount ?? 0);
 	const isOnSale = compare > product.price_amount;
+	const { isMobile } = useIsMobile();
 
 	return (
 		<Card
@@ -60,9 +62,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onClick }) => {
 			</Box>
 
 			<CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
-				<Typography variant="caption" color="text.secondary">
-					{product.brand.name} • {product.category.name}
-				</Typography>
+				{!isMobile && (
+					<Typography variant="caption" color="text.secondary">
+						{product.brand.name} • {product.category.name}
+					</Typography>
+				)}
 
 				<Typography variant="h5" component="div" noWrap title={product.title}>
 					{product.title}

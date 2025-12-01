@@ -90,9 +90,9 @@ const ProductList: React.FC = () => {
 								</Typography>
 							</Box>
 						) : (
-							<Grid container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
+							<Grid container spacing={{ xs: 4, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
 								{data?.items?.map(product => (
-									<Grid size={{ xs: 2, sm: 4, md: 3 }} key={product.slug}>
+									<Grid size={{ xs: 4, sm: 4, md: 3 }} key={product.slug}>
 										<ProductCard product={product as ProductListItem} onClick={slug => navigate(`/products/${slug}`)} />
 									</Grid>
 								))}

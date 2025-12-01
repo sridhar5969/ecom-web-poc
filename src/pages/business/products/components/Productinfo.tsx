@@ -14,6 +14,7 @@ import { useNotification } from '../../../../hooks/useNotification';
 import { ProductDetail } from '../../../../types/product.types';
 import { getFallbackImage } from '../utils/getFallbackImage';
 import { useAddToCartMutation } from '../../../../store/api/business/cart.api';
+import useIsMobile from '../../../../hooks/useIsMobile';
 
 // Format money
 const formatMoney = (amount: number, currency?: string) =>
@@ -61,6 +62,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 	const currentVariant = normalizedVariants.find(v => v.id === selectedVariantId) || normalizedVariants[0];
 
 	const totalPrice = currentVariant.price_amount * quantity;
+	const { isMobile } = useIsMobile();
 
 	const handleAddToCart = async () => {
 		if (!currentVariant.id) return show({ message: 'Please select a size', type: 'error' });
@@ -271,12 +273,11 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 				<Button
 					variant="contained"
 					color="primary"
-					size="large"
 					startIcon={<AddShoppingCartIcon />}
-					sx={{ flexGrow: 1, height: 48 }}
+					sx={{ flexGrow: 1 }}
 					onClick={handleAddToCart}
 				>
-					Add to Cart
+					{isMobile ? 'Add' : 'Add to cart'}
 				</Button>
 
 				{/* Secondary Actions */}

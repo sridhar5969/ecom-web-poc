@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 // material-ui
 import {
@@ -20,8 +19,8 @@ import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
 import { useLoginUserMutation } from '../../../store/api/auth/auth.api';
 import Button from '../../../components/common/button/Button';
 import { displayValidationErrors } from '../../../utils/helpers';
-import { useAppDispatch } from '../../../store/store';
 import { useMergeCartMutation } from '../../../store/api/business/cart.api';
+import { useLocation } from 'react-router-dom';
 
 interface FormValues {
 	email: string;
@@ -37,8 +36,10 @@ const validationSchema = Yup.object().shape({
 const AuthLogin = () => {
 	const [showPassword, setShowPassword] = useState(false);
 	const [submitError, setSubmitError] = useState<string>('');
-	const navigate = useNavigate();
-	const dispatch = useAppDispatch();
+	const location = useLocation();
+	// 1. Check if there is a 'from' location in state, otherwise default to '/'
+	// We append .search to keep query params (like ?category=shoes)
+	const from = location.state?.from?.pathname ? `${location.state.from.pathname}${location.state.from.search}` : '/';
 
 	const [loginUser] = useLoginUserMutation();
 	const [mergeCart] = useMergeCartMutation();
@@ -82,7 +83,7 @@ const AuthLogin = () => {
 			}
 			// Using window.location.href forces a full reload, which ensures
 			// all RTK Query caches are cleared and sockets re-connected.
-			window.location.href = '/';
+			window.location.href = from;
 		} catch (err: unknown) {
 			setSubmitError(err instanceof Error ? err.message : 'An error occurred');
 		}

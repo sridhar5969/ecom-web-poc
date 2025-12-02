@@ -15,6 +15,8 @@ import { getFallbackImage } from '../utils/getFallbackImage';
 import { useAddToCartMutation } from '../../../../store/api/business/cart.api';
 import useIsMobile from '../../../../hooks/useIsMobile';
 import { useAddToWishlistMutation, useGetWishlistsQuery } from '../../../../store/api/business/wishlists.api';
+import { useAuth } from '../../../../contexts/AuthContext';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // Format money
 const formatMoney = (amount: number, currency?: string) =>
@@ -28,9 +30,14 @@ interface ProductInfoProps {
 }
 
 const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
+	const navigate = useNavigate();
+	const location = useLocation();
+	const { isAuthenticated } = useAuth();
 	const [addToCart, { isLoading }] = useAddToCartMutation();
 	const [addToWishlist, { isError }] = useAddToWishlistMutation();
-	const { data: wishlists = [] } = useGetWishlistsQuery();
+	const { data: wishlists = [] } = useGetWishlistsQuery(undefined, {
+		skip: !isAuthenticated
+	});
 	const defaultWishlistId = wishlists?.data?.[0]?.id;
 	const { show } = useNotification();
 
@@ -83,10 +90,18 @@ const ProductInfo: React.FC<ProductInfoProps> = ({ product }) => {
 	};
 
 	const handleAddToWishlist = async () => {
+		// 1. Redirect guests to login immediately
+		if (!isAuthenticated) {
+			return navigate('/auth/login', {
+				state: { from: location }
+			});
+		}
+
 		if (!currentVariant.id) return show({ message: 'Please select a size', type: 'error' });
 
+		// 2. Handle case where user is logged in but query hasn't finished loading yet
 		if (!defaultWishlistId) {
-			return show({ message: 'Wishlist not loaded yet', type: 'error' });
+			return show({ message: 'Loading your wishlist...', type: 'info' });
 		}
 
 		try {

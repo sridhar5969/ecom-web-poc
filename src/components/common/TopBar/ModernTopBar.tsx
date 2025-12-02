@@ -140,7 +140,7 @@ const ModernTopBar = ({ onMenuToggle, drawerOpen, title }: ModernTopBarProps) =>
 				<Stack direction="row" alignItems="center" spacing={{ xs: 0.5, sm: 1, md: 1 }}>
 					{/* Cart Icon */}
 					<Tooltip title="View Wishlists">
-						<IconButton onClick={() => navigate('/wishlist')}>
+						<IconButton onClick={() => navigate('/wishlists')}>
 							<Badge color="error">
 								<MdFavorite />
 							</Badge>

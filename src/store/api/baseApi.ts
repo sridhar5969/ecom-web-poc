@@ -60,57 +60,45 @@ const transformErrorResponse = (errorResponse: ErrorResponse, status?: number): 
  * Returns true if refresh was successful, false otherwise
  * Uses Promise deduplication to ensure only one refresh happens at a time
  */
-const attemptTokenRefresh = async (
-	api: Parameters<BaseQueryFn>[1],
-	extraOptions: Parameters<BaseQueryFn>[2]
-): Promise<boolean> => {
-	// If a refresh is already in progress, wait for it
-	if (refreshTokenPromise) {
-		return refreshTokenPromise;
-	}
+const attemptTokenRefresh = async (api, extraOptions): Promise<boolean> => {
+	if (refreshTokenPromise) return refreshTokenPromise;
 
-	// Start a new refresh
 	refreshTokenPromise = (async () => {
 		try {
 			logger.info('Attempting token refresh');
 
-			// Prepare refresh request based on auth mode
-			const refreshToken = TokenStorage.getRefreshToken();
-			const refreshArgs: string | FetchArgs =
-				env.VITE_AUTH_MODE === 'localStorage' && refreshToken
+			const refreshArgs: FetchArgs =
+				env.VITE_AUTH_MODE === 'localStorage'
 					? {
 							url: 'auth/refresh',
 							method: 'POST',
-							body: { refreshToken }
+							body: { refreshToken: TokenStorage.getRefreshToken() },
+							credentials: 'include'
 						}
-					: 'auth/refresh';
+					: {
+							url: 'auth/refresh',
+							method: 'POST',
+							credentials: 'include'
+						};
 
 			const refresh = await rawBaseQuery(refreshArgs, api, extraOptions);
 
 			if (refresh.data && isBackendResponse(refresh.data)) {
-				if (refresh.data.success === false) {
-					logApiError(refresh.data, { action: 'token_refresh' });
-					return false;
-				} else {
-					// Store tokens if in localStorage mode
-					if (env.VITE_AUTH_MODE === 'localStorage' && refresh.data.data) {
-						const data = refresh.data.data as { accessToken?: string; refreshToken?: string };
-						if (data.accessToken && data.refreshToken) {
-							TokenStorage.setTokens(data.accessToken, data.refreshToken);
-						}
-					}
+				if (!refresh.data.success) return false;
 
-					logger.info('Token refresh successful');
-					return true;
+				if (env.VITE_AUTH_MODE === 'localStorage' && refresh.data.data) {
+					const tokens = refresh.data.data;
+					if (tokens.accessToken && tokens.refreshToken) {
+						TokenStorage.setTokens(tokens.accessToken, tokens.refreshToken);
+					}
 				}
-			} else if (refresh.error) {
-				logApiError(refresh.error, { action: 'token_refresh' });
-				return false;
+
+				logger.info('Token refresh successful');
+				return true;
 			}
 
 			return false;
 		} finally {
-			// Clear the promise so future requests can trigger a new refresh if needed
 			refreshTokenPromise = null;
 		}
 	})();
@@ -182,9 +170,10 @@ export const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryE
 
 		// Handle 401 unauthorized - attempt token refresh
 		if (result.error?.status === HTTP_STATUS.UNAUTHORIZED) {
-			if (!TokenStorage.getRefreshToken()) {
-				return result; // ← prevent refresh attempts for public routes
-			}
+			console.log('refresh tried');
+			// if (!TokenStorage.getRefreshToken()) {
+			// 	return result; // ← prevent refresh attempts for public routes
+			// }
 
 			const refreshSuccessful = await attemptTokenRefresh(api, extraOptions);
 

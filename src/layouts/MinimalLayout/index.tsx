@@ -8,6 +8,7 @@ import { RoleProvider } from '../../contexts/RoleContext';
  * MinimalLayout - Simplified, no more session checks
  * Uses AuthContext for session data
  */
+
 const MinimalLayout = () => {
 	const { session } = useAuth();
 
@@ -23,4 +24,8 @@ const MinimalLayout = () => {
 	);
 };
 
-export default MinimalLayout;
+const MinimalLayoutWrapper = () => {
+	return <MinimalLayout />;
+};
+
+export default MinimalLayoutWrapper;

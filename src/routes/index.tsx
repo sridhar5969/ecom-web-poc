@@ -6,6 +6,7 @@ import NotFound from '../pages/general/NotFound';
 import { StorefrontRoutes } from './public/storefront.routes';
 import { LoginRoutes } from './auth/LoginRoutes';
 import DashboardRedirect from '../pages/DashboardRedirect';
+import { UserRoutes } from './protected/user.routes';
 
 // Import all your screen components
 // Example:
@@ -20,6 +21,7 @@ import DashboardRedirect from '../pages/DashboardRedirect';
 export const routes = [
 	// Public routes (storefront, etc.)
 	StorefrontRoutes,
+	UserRoutes,
 
 	// Auth routes (login, register, etc.)
 	LoginRoutes,
@@ -62,7 +64,7 @@ export const routes = [
 	{
 		path: '*',
 		element: (
-			<MinimalLayout>
+			<MinimalLayout requiresAuth={false}>
 				<NotFound />
 			</MinimalLayout>
 		)

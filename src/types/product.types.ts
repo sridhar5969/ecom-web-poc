@@ -165,4 +165,6 @@ export type ProductVariant = ProductDetail['variants'][number];
 export type ProductQueryParams = {
 	page?: number;
 	limit?: number;
+	brand?: string;
+	category?: string;
 };

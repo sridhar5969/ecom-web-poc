@@ -90,6 +90,7 @@ export const ProductDetailSchema = base({
 		price_summary: z.object({
 			base_amount: z.number(),
 			currency: z.string(),
+			compare_at_amount: z.union([z.string(), z.number()]).optional(),
 			range: z.object({
 				min: z.number(),
 				max: z.number()
@@ -113,6 +114,44 @@ export const ProductDetailSchema = base({
 				available_stock: z.number().optional()
 			})
 		),
+
+		metadata: z.record(z.string(), z.any()).optional(),
+
+		bundles: z
+			.array(
+				z.object({
+					id: z.string(),
+					title: z.string(),
+					slug: z.string(),
+					description: z.string().nullable(),
+					brand_id: z.string().nullable(),
+					variant_id: z.string(),
+					variant_sku: z.string().nullable(),
+					variant_name: z.string().nullable(),
+					price_amount: z.number(),
+					price_currency: z.string(),
+					compare_at_amount: z.number().nullable(),
+					primary_image_url: z.string().nullable(),
+					components: z.array(
+						z.object({
+							variant_id: z.string(),
+							quantity: z.number(),
+							product_id: z.string(),
+							product_title: z.string(),
+							product_slug: z.string(),
+							product_description: z.string().nullable(),
+							brand_id: z.string().nullable(),
+							variant_sku: z.string().nullable(),
+							variant_name: z.string().nullable(),
+							price_amount: z.number(),
+							price_currency: z.string(),
+							primary_image_url: z.string().nullable()
+						})
+					)
+				})
+			)
+			.optional(),
+
 		average_rating: z.number(),
 		review_count: z.number(),
 		created_at: z.string(),

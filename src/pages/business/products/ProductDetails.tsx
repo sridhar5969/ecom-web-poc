@@ -7,6 +7,7 @@ import Loader from '../../../components/common/Loader';
 
 import ProductGallery from './components/ProductGallery';
 import ProductInfo from './components/Productinfo';
+import ProductBundles from './components/ProductBundles';
 
 // Zod-based type
 import { ProductDetail } from '../../../types/product.types';
@@ -53,6 +54,13 @@ const ProductDetailsPage: React.FC = () => {
 						<ProductInfo product={product} />
 					</Grid>
 				</Grid>
+
+				{/* Product Bundles Section */}
+				{product.bundles && product.bundles.length > 0 && (
+					<Box sx={{ mt: 6 }}>
+						<ProductBundles bundles={product.bundles} />
+					</Box>
+				)}
 			</Container>
 		</Box>
 	);

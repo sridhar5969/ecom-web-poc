@@ -12,6 +12,7 @@ import { useNotification } from '../../../hooks/useNotification';
 
 import CartItem from './components/CartItem';
 import ModernTopBar from '../../../components/common/TopBar/ModernTopBar';
+import { useSessionContextQuery } from '../../../store/api/auth/session.api';
 
 const formatMoney = (amount: number) =>
 	new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount / 100);
@@ -19,6 +20,8 @@ const formatMoney = (amount: number) =>
 const CartPage: React.FC = () => {
 	const navigate = useNavigate();
 	const { show } = useNotification();
+	const { data: sessionData, isLoading: isSessionLoading } = useSessionContextQuery();
+	const isAuthenticated = !!sessionData?.userId;
 
 	// 1. Fetch Cart Data (Auto-refreshes on updates)
 	const { data: cartData, isLoading, isError } = useGetCartQuery();
@@ -48,6 +51,12 @@ const CartPage: React.FC = () => {
 	const handleCheckout = () => {
 		if (!cartData || cartData.items.length === 0) return;
 		show({ message: 'Proceeding to checkout...', type: 'success' });
+		if (!isSessionLoading && !isAuthenticated) {
+			show({ message: 'Please login to continue with checkout', type: 'info' });
+			navigate(`/login?returnUrl=${encodeURIComponent(location.pathname)}`, { replace: true });
+			return;
+		}
+
 		navigate('/checkout');
 	};
 

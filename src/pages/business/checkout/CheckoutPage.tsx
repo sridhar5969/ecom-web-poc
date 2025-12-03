@@ -47,23 +47,10 @@ type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
 const CheckoutPage: React.FC = () => {
 	const navigate = useNavigate();
-	const location = useLocation();
 	const { show } = useNotification();
 	const { data: cartData, isLoading: isCartLoading } = useGetCartQuery();
 	const [processCheckout, { isLoading: isSubmitting }] = useProcessCheckoutMutation();
 	const [paymentSession, setPaymentSession] = React.useState<any>(null);
-
-	// Check authentication
-	const { data: sessionData, isLoading: isSessionLoading } = useSessionContextQuery();
-	const isAuthenticated = !!sessionData?.userId;
-
-	// Redirect to login if not authenticated
-	React.useEffect(() => {
-		if (!isSessionLoading && !isAuthenticated) {
-			show({ message: 'Please login to continue with checkout', type: 'info' });
-			navigate(`/login?returnUrl=${encodeURIComponent(location.pathname)}`, { replace: true });
-		}
-	}, []);
 
 	const { control, handleSubmit, watch } = useForm<CheckoutFormValues>({
 		resolver: zodResolver(checkoutSchema),

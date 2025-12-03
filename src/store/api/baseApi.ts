@@ -171,9 +171,11 @@ export const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryE
 		// Handle 401 unauthorized - attempt token refresh
 		if (result.error?.status === HTTP_STATUS.UNAUTHORIZED) {
 			console.log('refresh tried');
-			// if (!TokenStorage.getRefreshToken()) {
-			// 	return result; // ← prevent refresh attempts for public routes
-			// }
+			// Only skip refresh when using localStorage mode and the refresh token is missing.
+			// In cookie auth mode the server may rely on http-only cookies, so allow the refresh attempt.
+			if (env.VITE_AUTH_MODE === 'localStorage' && !TokenStorage.getRefreshToken()) {
+				return result; // ← prevent refresh attempts for public routes or missing token
+			}
 
 			const refreshSuccessful = await attemptTokenRefresh(api, extraOptions);
 

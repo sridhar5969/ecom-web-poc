@@ -1,10 +1,14 @@
 import { Typography, Box, Paper, Container, Link } from '@mui/material';
-import AuthLogin from './auth-forms/AuthLogin';
 import Logo from '../../components/common/logo/Logo';
 import { env } from '../../config/env';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import AuthRegister from './auth-forms/AuthRegister';
 
-const Login = () => {
-	const searchParams = new URLSearchParams(window.location.search);
+const Register = () => {
+	console.log('Register Page Rendered');
+	const navigate = useNavigate();
+	const [params] = useSearchParams();
+
 	return (
 		<Box
 			sx={{
@@ -113,13 +117,14 @@ const Login = () => {
 									mb: 1
 								}}
 							>
-								Login
+								Create Account
 							</Typography>
 							<Typography variant="body2" color="text.secondary">
-								Don't have an account?{' '}
+								Already have an account?{' '}
 								<Link
-									href={`/register${searchParams.get('returnUrl') ? `?returnUrl=${encodeURIComponent(searchParams.get('returnUrl')!)}` : ''}`}
+									onClick={() => navigate(params.get('returnUrl') || '/login')}
 									sx={{
+										cursor: 'pointer',
 										color: 'primary.main',
 										textDecoration: 'none',
 										'&:hover': {
@@ -127,13 +132,13 @@ const Login = () => {
 										}
 									}}
 								>
-									Sign up
+									Sign in
 								</Link>
 							</Typography>
 						</Box>
 
 						{/* Form */}
-						<AuthLogin />
+						<AuthRegister />
 					</Paper>
 				</Container>
 			</Box>
@@ -190,4 +195,4 @@ const Login = () => {
 	);
 };
 
-export default Login;
+export default Register;

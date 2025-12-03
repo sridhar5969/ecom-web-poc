@@ -18,11 +18,12 @@ import {
 	Stack,
 	CircularProgress
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ModernTopBar from '../../../components/common/TopBar/ModernTopBar';
 import { useGetCartQuery } from '../../../store/api/business/cart.api';
 import { useProcessCheckoutMutation } from '../../../store/api/business/checkout.api';
 import { useNotification } from '../../../hooks/useNotification';
+import { useSessionContextQuery } from '../../../store/api/auth/session.api';
 
 const addressSchema = z.object({
 	fullName: z.string().min(1, 'Full name is required'),
@@ -46,10 +47,23 @@ type CheckoutFormValues = z.infer<typeof checkoutSchema>;
 
 const CheckoutPage: React.FC = () => {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const { show } = useNotification();
 	const { data: cartData, isLoading: isCartLoading } = useGetCartQuery();
 	const [processCheckout, { isLoading: isSubmitting }] = useProcessCheckoutMutation();
 	const [paymentSession, setPaymentSession] = React.useState<any>(null);
+
+	// Check authentication
+	const { data: sessionData, isLoading: isSessionLoading } = useSessionContextQuery();
+	const isAuthenticated = !!sessionData?.userId;
+
+	// Redirect to login if not authenticated
+	React.useEffect(() => {
+		if (!isSessionLoading && !isAuthenticated) {
+			show({ message: 'Please login to continue with checkout', type: 'info' });
+			navigate(`/login?returnUrl=${encodeURIComponent(location.pathname)}`, { replace: true });
+		}
+	}, []);
 
 	const { control, handleSubmit, watch } = useForm<CheckoutFormValues>({
 		resolver: zodResolver(checkoutSchema),

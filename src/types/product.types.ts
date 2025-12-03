@@ -97,7 +97,17 @@ export const ProductDetailSchema = base({
 			})
 		}),
 
-		images: z.array(z.any()),
+		primary_image_url: z.string().optional(),
+
+		images: z.array(
+			z.object({
+				id: z.string(),
+				url: z.string(),
+				alt_text: z.string().optional(),
+				is_primary: z.boolean().optional(),
+				display_order: z.number().optional()
+			})
+		),
 
 		variants: z.array(
 			z.object({
@@ -107,9 +117,9 @@ export const ProductDetailSchema = base({
 				price_amount: z.number(),
 				price_currency: z.string(),
 				compare_at_amount: z.number().optional(),
-				cost_price_amount: z.number(),
+				cost_price_amount: z.number().optional(),
 				is_active: z.boolean(),
-				updated_at: z.string(),
+				updated_at: z.string().optional(),
 				images: z.array(z.any()),
 				available_stock: z.number().optional()
 			})
@@ -154,8 +164,7 @@ export const ProductDetailSchema = base({
 
 		average_rating: z.number(),
 		review_count: z.number(),
-		created_at: z.string(),
-		updated_at: z.string()
+		flags: z.record(z.string(), z.any()).optional()
 	})
 });
 

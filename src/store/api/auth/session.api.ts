@@ -41,8 +41,8 @@ export const sessionApi = rootApi.injectEndpoints({
 	})
 });
 
-const { useUserSessionContextQuery } = sessionApi;
-
+const { useUserSessionContextQuery ,useLazyUserSessionContextQuery} = sessionApi;
+export {useLazyUserSessionContextQuery}
 /**
  * Simplified session hook - treats 401 as "not authenticated" rather than error
  */
@@ -56,6 +56,7 @@ export const useSessionContextQuery = () => {
 	const is401 = query.error && 'status' in query.error && query.error.status === 401;
 
 	if (is401) {
+		console.log('SessionContextQuery: User is not authenticated (401)');
 		return {
 			data: null,
 			isLoading: false,

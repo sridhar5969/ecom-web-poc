@@ -20,7 +20,7 @@ import { useLoginUserMutation } from '../../../store/api/auth/auth.api';
 import Button from '../../../components/common/button/Button';
 import { displayValidationErrors } from '../../../utils/helpers';
 import { useMergeCartMutation } from '../../../store/api/business/cart.api';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 
 interface FormValues {
 	email: string;
@@ -34,6 +34,7 @@ const validationSchema = Yup.object().shape({
 });
 
 const AuthLogin = () => {
+	const [params] = useSearchParams();
 	const [showPassword, setShowPassword] = useState(false);
 	const [submitError, setSubmitError] = useState<string>('');
 	const location = useLocation();
@@ -83,7 +84,7 @@ const AuthLogin = () => {
 			}
 			// Using window.location.href forces a full reload, which ensures
 			// all RTK Query caches are cleared and sockets re-connected.
-			window.location.href = from;
+			window.location.href = params?.get('returnUrl') || from;
 		} catch (err: unknown) {
 			setSubmitError(err instanceof Error ? err.message : 'An error occurred');
 		}

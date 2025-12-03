@@ -1,5 +1,4 @@
 import { ProductDetail } from '../../../../types/product.types';
-import { MOCK_PRODUCTS } from '../mocks/products';
 
 export const getFallbackImage = (product?: ProductDetail): string => {
 	if (product?.images?.length && product.images[0]?.url) {

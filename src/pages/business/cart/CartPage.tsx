@@ -1,18 +1,16 @@
-import React from 'react';
-import { Box, Container, Grid, Typography, Button, Paper, Divider, Stack, CircularProgress } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Box, Button, CircularProgress, Container, Divider, Grid, Paper, Stack, Typography } from '@mui/material';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
 	useGetCartQuery,
-	useUpdateCartItemMutation,
-	useRemoveCartItemMutation
+	useRemoveCartItemMutation,
+	useUpdateCartItemMutation
 } from '../../../store/api/business/cart.api';
-
 import { useNotification } from '../../../hooks/useNotification';
-
-import CartItem from './components/CartItem';
 import ModernTopBar from '../../../components/common/TopBar/ModernTopBar';
-import { useSessionContextQuery } from '../../../store/api/auth/session.api';
+import { useLazyUserSessionContextQuery } from '../../../store/api/auth/session.api';
+import CartItem from './components/CartItem';
 
 const formatMoney = (amount: number) =>
 	new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount / 100);
@@ -20,8 +18,7 @@ const formatMoney = (amount: number) =>
 const CartPage: React.FC = () => {
 	const navigate = useNavigate();
 	const { show } = useNotification();
-	const { data: sessionData, isLoading: isSessionLoading } = useSessionContextQuery();
-	const isAuthenticated = !!sessionData?.userId;
+	const [triggerSession] = useLazyUserSessionContextQuery();
 
 	// 1. Fetch Cart Data (Auto-refreshes on updates)
 	const { data: cartData, isLoading, isError } = useGetCartQuery();
@@ -48,10 +45,13 @@ const CartPage: React.FC = () => {
 		}
 	};
 
-	const handleCheckout = () => {
+	const handleCheckout = async () => {
 		if (!cartData || cartData.items.length === 0) return;
 		show({ message: 'Proceeding to checkout...', type: 'success' });
-		if (!isSessionLoading && !isAuthenticated) {
+		const session = await triggerSession()
+			.unwrap()
+			.catch(() => null);
+		if (!session?.userId) {
 			show({ message: 'Please login to continue with checkout', type: 'info' });
 			navigate(`/login?returnUrl=${encodeURIComponent(location.pathname)}`, { replace: true });
 			return;

@@ -53,7 +53,7 @@ const CartPage: React.FC = () => {
 			.catch(() => null);
 		if (!session?.userId) {
 			show({ message: 'Please login to continue with checkout', type: 'info' });
-			navigate(`/login?returnUrl=${encodeURIComponent(location.pathname)}`, { replace: true });
+			navigate(`/login?returnUrl=${encodeURIComponent('/checkout')}`, { replace: true });
 			return;
 		}
 

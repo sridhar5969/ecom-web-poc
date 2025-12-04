@@ -124,9 +124,9 @@ export default defineConfig(({ mode }) => {
 		// Define environment variables
 		// Expose non-VITE_ prefixed env vars to client via import.meta.env
 		define: {
-			'import.meta.env.API_BASE_URL': JSON.stringify(env.API_BASE_URL || 'http://localhost:8000/api/'),
+			'import.meta.env.API_BASE_URL': JSON.stringify(env.API_BASE_URL || 'https://ecom-backend-3wkh.onrender.com/api/'),
 			'import.meta.env.API_BASE_URL_PRE_AUTH': JSON.stringify(
-				env.API_BASE_URL_PRE_AUTH || 'http://localhost:8000/api/'
+				env.API_BASE_URL_PRE_AUTH || 'https://ecom-backend-3wkh.onrender.com/api/'
 			),
 			'import.meta.env.REDIRECT_URI': JSON.stringify(env.REDIRECT_URI || 'http://localhost:5173/auth/login')
 		}

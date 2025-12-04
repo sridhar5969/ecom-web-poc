@@ -1,7 +1,6 @@
 import { Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import MainLayout from '../layouts/MainLayout';
-import MinimalLayout from '../layouts/MinimalLayout';
 import NotFound from '../pages/general/NotFound';
 import { StorefrontRoutes } from './public/storefront.routes';
 import { LoginRoutes } from './auth/LoginRoutes';
@@ -63,10 +62,6 @@ export const routes = [
 	// Global 404
 	{
 		path: '*',
-		element: (
-			<MinimalLayout requiresAuth={false}>
-				<NotFound />
-			</MinimalLayout>
-		)
+		element: <NotFound />
 	}
 ];

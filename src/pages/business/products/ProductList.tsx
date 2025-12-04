@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Box, Grid, Pagination, Skeleton, Typography, Button } from '@mui/material';
+import { Box, Grid, Skeleton, Typography, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from './components/ProductCard';
 import { ProductListItem } from '../../../types/product.types';
 import { useGetProductListQuery } from '../../../store/api/business/product.api';
+import { useProductFilters } from '../../../hooks/useProductFilters';
 
 interface ProductListProps {
 	products?: ProductListItem[]; // array mode
@@ -13,6 +14,7 @@ interface ProductListProps {
 }
 
 const ProductList: React.FC<ProductListProps> = ({ products, loading, query, limit = 12 }) => {
+	const { queryParams } = useProductFilters();
 	const navigate = useNavigate();
 
 	/** detect mode */
@@ -22,7 +24,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, loading, query, lim
 	const [page, setPage] = useState(1);
 
 	/** API MODE **/
-	const { data, isLoading, isError, refetch } = useGetProductListQuery({ page, limit, ...query }, { skip: !isApiMode });
+	const { data, isLoading, isError, refetch } = useGetProductListQuery(queryParams, { skip: !isApiMode });
 
 	/** ARRAY MODE **/
 	const paginatedArray = !isApiMode && products ? products.slice((page - 1) * limit, page * limit) : [];
@@ -77,7 +79,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, loading, query, lim
 			)}
 
 			{/* PAGINATION */}
-			{totalPages > 1 && (
+			{/* {totalPages > 1 && (
 				<Box sx={{ mt: 6, display: 'flex', justifyContent: 'center' }}>
 					<Pagination
 						count={totalPages}
@@ -89,7 +91,7 @@ const ProductList: React.FC<ProductListProps> = ({ products, loading, query, lim
 						showLastButton
 					/>
 				</Box>
-			)}
+			)} */}
 		</>
 	);
 };

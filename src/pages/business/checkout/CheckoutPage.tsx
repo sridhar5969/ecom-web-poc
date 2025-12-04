@@ -361,13 +361,20 @@ const CheckoutPage: React.FC = () => {
 									</Typography>
 									<Divider sx={{ mb: 2 }} />
 									{cartData.items.map((item: any) => (
-										<Box key={item.variantId} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-											<Typography variant="body2">
-												{item.productName} x {item.quantity}
-											</Typography>
-											<Typography variant="body2">${((item.price * item.quantity) / 100).toFixed(2)}</Typography>
-										</Box>
+										<Grid container key={item.variantId} spacing={2} alignItems="center">
+											<Grid item size={{ xs: 9 }}>
+												<Typography variant="body2">
+													<span className="clamp-1">{item.variantName}</span>
+												</Typography>
+											</Grid>
+											<Grid item size={{ xs: 3 }}>
+												<Typography variant="body2">
+													x {item.quantity} ${((item.price * item.quantity) / 100).toFixed(2)}
+												</Typography>
+											</Grid>
+										</Grid>
 									))}
+
 									<Divider sx={{ my: 2 }} />
 									<Stack direction="row" justifyContent="space-between">
 										<Typography variant="h6">Total</Typography>

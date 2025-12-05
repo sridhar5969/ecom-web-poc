@@ -24,7 +24,7 @@ export const ProductListSchema = base({
 			id: z.string(),
 			title: z.string(),
 			slug: z.string(),
-			description: z.string().optional(),
+			description: z.string().optional().nullable(),
 			price_amount: z.number(),
 			price_currency: z.string(),
 			compare_at_amount: z.union([z.string(), z.number()]).optional(),

@@ -18,12 +18,11 @@ import {
 	Stack,
 	CircularProgress
 } from '@mui/material';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import ModernTopBar from '../../../components/common/TopBar/ModernTopBar';
 import { useGetCartQuery } from '../../../store/api/business/cart.api';
 import { useProcessCheckoutMutation } from '../../../store/api/business/checkout.api';
 import { useNotification } from '../../../hooks/useNotification';
-import { useSessionContextQuery } from '../../../store/api/auth/session.api';
 
 const addressSchema = z.object({
 	fullName: z.string().min(1, 'Full name is required'),

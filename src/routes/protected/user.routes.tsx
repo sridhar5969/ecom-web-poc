@@ -1,6 +1,4 @@
-import { ProtectedRoute } from '../../components/ProtectedRoute';
 import MinimalLayout from '../../layouts/MinimalLayout';
-import WishlistPage from '../../pages/business/wishlist/WishlistPage';
 
 export const UserRoutes = {
 	path: '/',

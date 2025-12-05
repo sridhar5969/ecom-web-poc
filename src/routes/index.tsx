@@ -50,7 +50,7 @@ export const routes = [
 			// Catch-all 404
 			{ path: '*', element: <NotFound /> }
 		]
-	}
+	},
 
 	// Root redirect
 	// {
@@ -59,8 +59,8 @@ export const routes = [
 	// },
 
 	// Global 404
-	// {
-	// 	path: '*',
-	// 	element: <NotFound />
-	// }
+	{
+		path: '*',
+		element: <NotFound />
+	}
 ];

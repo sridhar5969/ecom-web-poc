@@ -32,9 +32,9 @@ import { useAuth } from '../../../contexts/AuthContext';
 import { useGetCartQuery } from '../../../store/api/business/cart.api';
 
 interface ModernTopBarProps {
-	onMenuToggle: () => void;
-	drawerOpen: boolean;
-	title: string;
+	onMenuToggle?: () => void;
+	drawerOpen?: boolean;
+	title?: string | undefined;
 }
 
 const ModernTopBar = ({ onMenuToggle, drawerOpen, title }: ModernTopBarProps) => {

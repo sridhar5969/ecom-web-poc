@@ -74,6 +74,10 @@ const CheckoutPage: React.FC = () => {
 
 			// Check if online payment
 			if (result.paymentMethod === 'online' && result.paymentSession) {
+				if (result.paymentSession.url) {
+					window.location.href = result.paymentSession.url;
+					return;
+				}
 				setPaymentSession(result.paymentSession);
 				show({ message: 'Payment session created. Please complete payment.', type: 'info' });
 			} else {

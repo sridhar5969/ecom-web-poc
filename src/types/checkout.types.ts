@@ -18,18 +18,16 @@ export interface CheckoutRequest {
 }
 
 export interface CheckoutResponse {
-	paymentSession: {
-		code: string;
-		data: {
-			expires: string;
-			amount: number;
-			account_number: string;
-			account_name: string;
-			bank: string;
-			payment_session: string;
-		};
-		message: string;
-		status: boolean;
+	paymentSession?: {
+		sessionId: string;
+		accountNumber?: string;
+		accountName?: string;
+		bank?: string;
+		amount?: number;
+		expiresAt?: string;
+		status: string;
+		providerResponse?: any;
+		url?: string;
 	};
 	paymentMethod: string;
 	orderId: string;

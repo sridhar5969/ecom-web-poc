@@ -122,7 +122,7 @@ const Register = () => {
 							<Typography variant="body2" color="text.secondary">
 								Already have an account?{' '}
 								<Link
-									onClick={() => navigate(params.get('returnUrl') || '/login')}
+									onClick={() => navigate(params.get('returnUrl') || '/auth/login')}
 									sx={{
 										cursor: 'pointer',
 										color: 'primary.main',

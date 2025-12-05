@@ -1,11 +1,9 @@
-import { Navigate } from 'react-router-dom';
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import MainLayout from '../layouts/MainLayout';
-import NotFound from '../pages/general/NotFound';
-import { StorefrontRoutes } from './public/storefront.routes';
-import { LoginRoutes, StandaloneLoginRoute, StandaloneRegisterRoute } from './auth/LoginRoutes';
 import DashboardRedirect from '../pages/DashboardRedirect';
-import { UserRoutes } from './protected/user.routes';
+import NotFound from '../pages/general/NotFound';
+import { LoginRoutes } from './auth/LoginRoutes';
+import { StorefrontRoutes } from './public/storefront.routes';
 
 // Import all your screen components
 // Example:
@@ -20,12 +18,11 @@ import { UserRoutes } from './protected/user.routes';
 export const routes = [
 	// Public routes (storefront, etc.)
 	StorefrontRoutes,
-	UserRoutes,
 
 	// Auth routes (login, register, etc.)
 	LoginRoutes,
-	StandaloneLoginRoute,
-	StandaloneRegisterRoute,
+	// StandaloneLoginRoute,
+	// StandaloneRegisterRoute,
 
 	// Protected admin routes
 	{
@@ -53,17 +50,17 @@ export const routes = [
 			// Catch-all 404
 			{ path: '*', element: <NotFound /> }
 		]
-	},
+	}
 
 	// Root redirect
-	{
-		path: '/',
-		element: <Navigate to="/products" replace />
-	},
+	// {
+	// 	path: '/',
+	// 	element: <Navigate to="/products" replace />
+	// },
 
 	// Global 404
-	{
-		path: '*',
-		element: <NotFound />
-	}
+	// {
+	// 	path: '*',
+	// 	element: <NotFound />
+	// }
 ];

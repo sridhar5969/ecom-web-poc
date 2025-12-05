@@ -560,7 +560,7 @@ function ProtectedComponent() {
   const token = TokenStorage.getAccessToken();
 
   if (!token) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/auth/login" />;
   }
 
   return <div>Protected Content</div>;

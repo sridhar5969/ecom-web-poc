@@ -41,8 +41,8 @@ export const sessionApi = rootApi.injectEndpoints({
 	})
 });
 
-const { useUserSessionContextQuery ,useLazyUserSessionContextQuery} = sessionApi;
-export {useLazyUserSessionContextQuery}
+const { useUserSessionContextQuery, useLazyUserSessionContextQuery } = sessionApi;
+export { useLazyUserSessionContextQuery };
 /**
  * Simplified session hook - treats 401 as "not authenticated" rather than error
  */

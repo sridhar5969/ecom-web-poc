@@ -16,13 +16,13 @@ export const LoginRoutes = {
 };
 
 // Standalone login route
-export const StandaloneLoginRoute = {
-	path: '/login',
-	element: <Login />
-};
+// export const StandaloneLoginRoute = {
+// 	path: '/login',
+// 	element: <Login />
+// };
 
-// Standalone register route
-export const StandaloneRegisterRoute = {
-	path: '/register',
-	element: <Register />
-};
+// // Standalone register route
+// export const StandaloneRegisterRoute = {
+// 	path: '/register',
+// 	element: <Register />
+// };

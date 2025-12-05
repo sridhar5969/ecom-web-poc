@@ -118,7 +118,7 @@ const Login = () => {
 							<Typography variant="body2" color="text.secondary">
 								Don't have an account?{' '}
 								<Link
-									href={`/register${searchParams.get('returnUrl') ? `?returnUrl=${encodeURIComponent(searchParams.get('returnUrl')!)}` : ''}`}
+									href={`/auth/register${searchParams.get('returnUrl') ? `?returnUrl=${encodeURIComponent(searchParams.get('returnUrl')!)}` : ''}`}
 									sx={{
 										color: 'primary.main',
 										textDecoration: 'none',

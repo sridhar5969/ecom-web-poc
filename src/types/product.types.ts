@@ -70,7 +70,7 @@ export const ProductDetailSchema = base({
 		id: z.string(),
 		title: z.string(),
 		slug: z.string(),
-		description: z.string(),
+		description: z.string().nullable(),
 		status: z.string(),
 
 		brand: z.object({

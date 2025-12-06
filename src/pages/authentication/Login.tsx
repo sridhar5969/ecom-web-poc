@@ -13,7 +13,7 @@ const Login = () => {
 				flexDirection: 'column',
 				position: 'relative',
 				overflow: 'hidden',
-				background: '#ffffff',
+				background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)',
 				'&::before': {
 					content: '""',
 					position: 'absolute',
@@ -22,10 +22,21 @@ const Login = () => {
 					right: 0,
 					bottom: 0,
 					background: `
-						radial-gradient(circle at 20% 80%, rgba(138, 165, 203, 0.03) 0%, transparent 50%),
-						radial-gradient(circle at 80% 20%, rgba(87, 104, 128, 0.04) 0%, transparent 50%),
-						radial-gradient(circle at 40% 40%, rgba(58, 77, 104, 0.02) 0%, transparent 50%)
+						radial-gradient(circle at 15% 85%, rgba(220, 38, 38, 0.05) 0%, transparent 50%),
+						radial-gradient(circle at 85% 15%, rgba(185, 28, 28, 0.08) 0%, transparent 50%),
+						radial-gradient(circle at 50% 50%, rgba(239, 68, 68, 0.03) 0%, transparent 50%)
 					`,
+					zIndex: 0
+				},
+				'&::after': {
+					content: '""',
+					position: 'absolute',
+					top: '-10%',
+					right: '-5%',
+					width: '40%',
+					height: '40%',
+					background: 'radial-gradient(circle, rgba(220, 38, 38, 0.08) 0%, transparent 70%)',
+					filter: 'blur(60px)',
 					zIndex: 0
 				}
 			}}
@@ -38,7 +49,7 @@ const Login = () => {
 					left: 24,
 					display: 'flex',
 					alignItems: 'center',
-					gap: 1,
+					gap: 1.5,
 					zIndex: 2
 				}}
 			>
@@ -47,11 +58,14 @@ const Login = () => {
 						display: 'flex',
 						alignItems: 'center',
 						justifyContent: 'center',
-						width: 32,
-						height: 32
+						width: 40,
+						height: 40,
+						borderRadius: '10px',
+						background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+						boxShadow: '0 4px 12px rgba(220, 38, 38, 0.25)'
 					}}
 				>
-					<Logo sx={{ width: 18, height: 18 }} fill="black" />
+					<Logo sx={{ width: 27, height: 20 }} fill="white" />
 				</Box>
 				<Typography
 					variant="h6"
@@ -59,7 +73,7 @@ const Login = () => {
 					sx={{
 						fontWeight: 700,
 						color: '#1a1a1a',
-						letterSpacing: '-0.01em'
+						letterSpacing: '-0.02em'
 					}}
 				>
 					{env.VITE_APP_NAME}
@@ -113,14 +127,14 @@ const Login = () => {
 									mb: 1
 								}}
 							>
-								Login
+								Welcome Back
 							</Typography>
 							<Typography variant="body2" color="text.secondary">
 								Don't have an account?{' '}
 								<Link
 									href={`/auth/register${searchParams.get('returnUrl') ? `?returnUrl=${encodeURIComponent(searchParams.get('returnUrl')!)}` : ''}`}
 									sx={{
-										color: 'primary.main',
+										color: '#dc2626',
 										textDecoration: 'none',
 										'&:hover': {
 											textDecoration: 'underline'
@@ -162,7 +176,7 @@ const Login = () => {
 					<Link
 						href="#"
 						sx={{
-							color: '#0D5FDC',
+							color: '#dc2626',
 							textDecoration: 'none',
 							'&:hover': {
 								textDecoration: 'underline'

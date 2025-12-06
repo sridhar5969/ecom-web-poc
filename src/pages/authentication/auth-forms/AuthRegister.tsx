@@ -94,6 +94,19 @@ const AuthRegister = () => {
 					onChange={handleChange}
 					disabled={isLoading}
 					required
+					sx={{
+						'& .MuiOutlinedInput-root': {
+							'&:hover fieldset': {
+								borderColor: '#dc2626'
+							},
+							'&.Mui-focused fieldset': {
+								borderColor: '#dc2626'
+							}
+						},
+						'& .MuiInputLabel-root.Mui-focused': {
+							color: '#dc2626'
+						}
+					}}
 				/>
 				<TextField
 					fullWidth
@@ -103,6 +116,19 @@ const AuthRegister = () => {
 					onChange={handleChange}
 					disabled={isLoading}
 					required
+					sx={{
+						'& .MuiOutlinedInput-root': {
+							'&:hover fieldset': {
+								borderColor: '#dc2626'
+							},
+							'&.Mui-focused fieldset': {
+								borderColor: '#dc2626'
+							}
+						},
+						'& .MuiInputLabel-root.Mui-focused': {
+							color: '#dc2626'
+						}
+					}}
 				/>
 			</Box>
 
@@ -115,7 +141,20 @@ const AuthRegister = () => {
 				onChange={handleChange}
 				disabled={isLoading}
 				required
-				sx={{ mb: 2 }}
+				sx={{
+					mb: 2,
+					'& .MuiOutlinedInput-root': {
+						'&:hover fieldset': {
+							borderColor: '#dc2626'
+						},
+						'&.Mui-focused fieldset': {
+							borderColor: '#dc2626'
+						}
+					},
+					'& .MuiInputLabel-root.Mui-focused': {
+						color: '#dc2626'
+					}
+				}}
 			/>
 
 			<TextField
@@ -127,7 +166,20 @@ const AuthRegister = () => {
 				onChange={handleChange}
 				disabled={isLoading}
 				required
-				sx={{ mb: 2 }}
+				sx={{
+					mb: 2,
+					'& .MuiOutlinedInput-root': {
+						'&:hover fieldset': {
+							borderColor: '#dc2626'
+						},
+						'&.Mui-focused fieldset': {
+							borderColor: '#dc2626'
+						}
+					},
+					'& .MuiInputLabel-root.Mui-focused': {
+						color: '#dc2626'
+					}
+				}}
 				InputProps={{
 					endAdornment: (
 						<InputAdornment position="end">
@@ -135,6 +187,11 @@ const AuthRegister = () => {
 								aria-label="toggle password visibility"
 								onClick={() => setShowPassword(!showPassword)}
 								edge="end"
+								sx={{
+									'&:hover': {
+										color: '#dc2626'
+									}
+								}}
 							>
 								{showPassword ? <VisibilityOff /> : <Visibility />}
 							</IconButton>
@@ -152,7 +209,20 @@ const AuthRegister = () => {
 				onChange={handleChange}
 				disabled={isLoading}
 				required
-				sx={{ mb: 3 }}
+				sx={{
+					mb: 3,
+					'& .MuiOutlinedInput-root': {
+						'&:hover fieldset': {
+							borderColor: '#dc2626'
+						},
+						'&.Mui-focused fieldset': {
+							borderColor: '#dc2626'
+						}
+					},
+					'& .MuiInputLabel-root.Mui-focused': {
+						color: '#dc2626'
+					}
+				}}
 				InputProps={{
 					endAdornment: (
 						<InputAdornment position="end">
@@ -160,6 +230,11 @@ const AuthRegister = () => {
 								aria-label="toggle confirm password visibility"
 								onClick={() => setShowConfirmPassword(!showConfirmPassword)}
 								edge="end"
+								sx={{
+									'&:hover': {
+										color: '#dc2626'
+									}
+								}}
 							>
 								{showConfirmPassword ? <VisibilityOff /> : <Visibility />}
 							</IconButton>
@@ -178,7 +253,13 @@ const AuthRegister = () => {
 					py: 1.5,
 					textTransform: 'none',
 					fontSize: '1rem',
-					fontWeight: 600
+					fontWeight: 600,
+					background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+					boxShadow: '0 4px 12px rgba(220, 38, 38, 0.25)',
+					'&:hover': {
+						background: 'linear-gradient(135deg, #b91c1c 0%, #991b1b 100%)',
+						boxShadow: '0 6px 16px rgba(220, 38, 38, 0.35)'
+					}
 				}}
 			>
 				{isLoading ? <CircularProgress size={24} /> : 'Create Account'}

@@ -145,11 +145,11 @@ const AuthLogin = () => {
 								border: '1px solid #d1d5db',
 								transition: 'all 0.2s ease',
 								'&:hover': {
-									borderColor: '#0D5FDC'
+									borderColor: '#dc2626'
 								},
 								'&.Mui-focused': {
-									borderColor: '#0D5FDC',
-									boxShadow: '0 0 0 3px rgba(13, 95, 220, 0.1)'
+									borderColor: '#dc2626',
+									boxShadow: '0 0 0 3px rgba(220, 38, 38, 0.1)'
 								},
 								'&.Mui-error': {
 									borderColor: '#ef4444'
@@ -212,8 +212,8 @@ const AuthLogin = () => {
 									sx={{
 										color: '#6b7280',
 										'&:hover': {
-											color: '#0D5FDC',
-											backgroundColor: 'rgba(13, 95, 220, 0.08)'
+											color: '#dc2626',
+											backgroundColor: 'rgba(220, 38, 38, 0.08)'
 										}
 									}}
 								>
@@ -228,11 +228,11 @@ const AuthLogin = () => {
 								border: '1px solid #d1d5db',
 								transition: 'all 0.2s ease',
 								'&:hover': {
-									borderColor: '#0D5FDC'
+									borderColor: '#dc2626'
 								},
 								'&.Mui-focused': {
-									borderColor: '#0D5FDC',
-									boxShadow: '0 0 0 3px rgba(13, 95, 220, 0.1)'
+									borderColor: '#dc2626',
+									boxShadow: '0 0 0 3px rgba(220, 38, 38, 0.1)'
 								},
 								'&.Mui-error': {
 									borderColor: '#ef4444'
@@ -272,7 +272,7 @@ const AuthLogin = () => {
 								width: '16px',
 								height: '16px',
 								marginRight: '8px',
-								accentColor: '#0D5FDC'
+								accentColor: '#dc2626'
 							}}
 						/>
 						<label
@@ -290,7 +290,7 @@ const AuthLogin = () => {
 						href="#"
 						sx={{
 							fontSize: '0.875rem',
-							color: '#0D5FDC',
+							color: '#dc2626',
 							textDecoration: 'none',
 							'&:hover': {
 								textDecoration: 'underline'
@@ -334,8 +334,8 @@ const AuthLogin = () => {
 						fontSize: '1rem',
 						fontWeight: 600,
 						textTransform: 'none',
-						background: '#0D5FDC',
-						boxShadow: 'none',
+						background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+						boxShadow: '0 4px 12px rgba(220, 38, 38, 0.25)',
 						transition: 'all 0.2s ease'
 					}}
 				/>

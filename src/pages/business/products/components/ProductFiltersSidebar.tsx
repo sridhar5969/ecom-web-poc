@@ -8,32 +8,39 @@ import {
 	Divider,
 	TextField,
 	Button,
-	InputAdornment
+	InputAdornment,
+	Accordion,
+	AccordionSummary,
+	AccordionDetails,
+	IconButton
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { useProductFilters } from '../../../../hooks/useProductFilters'; // Adjust path as needed
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import CloseIcon from '@mui/icons-material/Close';
+
+// Adjust these imports to match your project structure
+import { useProductFilters } from '../../../../hooks/useProductFilters';
 import { useGetBrandsQuery } from '../../../../store/api/business/brands.api';
 import { useGetCategoriesQuery } from '../../../../store/api/business/categories.api';
 import Loader from '../../../../components/common/Loader';
 
-const ProductFilterSidebar = () => {
+const ProductFilterSidebar = ({ onClose, isMobile }) => {
 	const { getActiveList, toggleFilter, setFilter, queryParams, clearFilters } = useProductFilters();
 	const { data: brands, isLoading: isBrandsLoading } = useGetBrandsQuery();
 	const { data: categories, isLoading: isCategoriesLoading } = useGetCategoriesQuery();
-	console.log('cateogirs', categories);
-	// --- SEARCH STATE MANAGEMENT (Debouncing) ---
-	// 1. Local state controls the input field immediately so typing feels fast
+
+	// --- SEARCH STATE MANAGEMENT ---
 	const [localSearch, setLocalSearch] = useState(queryParams.search || '');
 
-	// 2. Sync local state if URL changes externally (e.g. back button)
+	// Sync local state if URL changes externally
 	useEffect(() => {
 		setLocalSearch(queryParams.search || '');
 	}, [queryParams.search]);
 
-	// 3. Debounce: Update URL only after user stops typing for 500ms
+	// Debounce: Update URL only after user stops typing
 	useEffect(() => {
 		const handler = setTimeout(() => {
-			// Only update if the value is different to avoid infinite loops
+			// Only update if the value is different
 			if (localSearch !== (queryParams.search || '')) {
 				setFilter('search', localSearch);
 			}
@@ -41,28 +48,50 @@ const ProductFilterSidebar = () => {
 
 		return () => clearTimeout(handler);
 	}, [localSearch, setFilter, queryParams.search]);
-	// ---------------------------------------------
+
+	// --- HANDLERS ---
+
+	// Robust Reset: Clears local state AND URL params immediately
+	const handleResetFilters = () => {
+		setLocalSearch(''); // 1. Clear Input UI
+		setFilter('search', ''); // 2. Clear Search URL Param immediately
+		clearFilters(); // 3. Clear all other filters (Brands, Cats, etc.)
+	};
 
 	// Derived state for UI checks
 	const activeBrands = getActiveList('brand');
 	const activeCategories = getActiveList('category');
 
 	return (
-		<Box sx={{ width: '100%', p: 2, bgcolor: 'background.paper', borderRadius: 2 }}>
+		<Box
+			sx={{
+				width: '100%',
+				p: 2,
+				bgcolor: 'background.paper',
+				borderRadius: 2,
+				height: isMobile ? '100%' : 'auto',
+				display: 'flex',
+				flexDirection: 'column',
+				// FIX: Add top margin on mobile to clear the fixed Navbar
+				mt: isMobile ? 8 : 0
+			}}
+		>
 			{/* Header */}
 			<Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
 				<Typography variant="h6" fontWeight="bold">
 					Filters
 				</Typography>
-				<Button
-					size="small"
-					onClick={() => {
-						setLocalSearch(''); // Clear local input
-						clearFilters(); // Clear URL params
-					}}
-				>
-					Reset
-				</Button>
+				<Box>
+					<Button size="small" onClick={handleResetFilters} sx={{ mr: 1 }}>
+						Reset
+					</Button>
+					{/* Close "X" button for Mobile Drawer */}
+					{isMobile && (
+						<IconButton onClick={onClose} size="small">
+							<CloseIcon />
+						</IconButton>
+					)}
+				</Box>
 			</Box>
 
 			{/* SEARCH FIELD */}
@@ -77,98 +106,87 @@ const ProductFilterSidebar = () => {
 						<InputAdornment position="start">
 							<SearchIcon color="action" fontSize="small" />
 						</InputAdornment>
+					),
+					// FIX: Added a clear "X" button inside the search field itself
+					endAdornment: localSearch && (
+						<InputAdornment position="end">
+							<IconButton size="small" onClick={() => setLocalSearch('')}>
+								<CloseIcon fontSize="small" />
+							</IconButton>
+						</InputAdornment>
 					)
 				}}
-				sx={{ mb: 3 }}
+				sx={{ mb: 2 }}
 			/>
 
 			<Divider sx={{ mb: 2 }} />
 
-			{/* 1. BRAND FILTER */}
-			<Typography variant="subtitle2" fontWeight="bold" mb={1}>
-				Brands
-			</Typography>
-			<FormGroup sx={{ mb: 2 }}>
-				{isBrandsLoading ? (
-					<Loader />
-				) : (
-					brands.items?.map(brand => (
-						<FormControlLabel
-							key={brand.slug}
-							control={
-								<Checkbox
-									size="small"
-									checked={activeBrands.includes(brand.slug)}
-									onChange={() => toggleFilter('brand', brand.slug)}
-								/>
-							}
-							label={<Typography variant="body2">{brand.name}</Typography>}
-						/>
-					))
-				)}
-			</FormGroup>
+			{/* Scrollable Container for Accordions */}
+			<Box sx={{ overflowY: 'auto', flexGrow: 1 }}>
+				{/* 1. BRAND FILTER ACCORDION */}
+				<Accordion defaultExpanded disableGutters elevation={0} sx={{ '&:before': { display: 'none' } }}>
+					<AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 0, minHeight: 48 }}>
+						<Typography variant="subtitle2" fontWeight="bold">
+							Brands
+						</Typography>
+					</AccordionSummary>
+					<AccordionDetails sx={{ p: 0 }}>
+						<FormGroup>
+							{isBrandsLoading ? (
+								<Loader />
+							) : (
+								brands?.items?.map(brand => (
+									<FormControlLabel
+										key={brand.slug}
+										control={
+											<Checkbox
+												size="small"
+												checked={activeBrands.includes(brand.slug)}
+												onChange={() => toggleFilter('brand', brand.slug)}
+											/>
+										}
+										label={<Typography variant="body2">{brand.name}</Typography>}
+									/>
+								))
+							)}
+						</FormGroup>
+					</AccordionDetails>
+				</Accordion>
 
-			<Divider sx={{ mb: 2 }} />
+				<Divider sx={{ my: 1 }} />
 
-			{/* 2. CATEGORY FILTER */}
-			<Typography variant="subtitle2" fontWeight="bold" mb={1}>
-				Categories
-			</Typography>
-			<FormGroup sx={{ mb: 2 }}>
-				{isCategoriesLoading ? (
-					<Loader />
-				) : (
-					categories.items.map(cat => (
-						<FormControlLabel
-							key={cat.slug}
-							control={
-								<Checkbox
-									size="small"
-									checked={activeCategories.includes(cat.slug)}
-									onChange={() => toggleFilter('category', cat.slug)}
-								/>
-							}
-							label={<Typography variant="body2">{cat.name}</Typography>}
-						/>
-					))
-				)}
-			</FormGroup>
+				{/* 2. CATEGORY FILTER ACCORDION */}
+				<Accordion defaultExpanded disableGutters elevation={0} sx={{ '&:before': { display: 'none' } }}>
+					<AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 0, minHeight: 48 }}>
+						<Typography variant="subtitle2" fontWeight="bold">
+							Categories
+						</Typography>
+					</AccordionSummary>
+					<AccordionDetails sx={{ p: 0 }}>
+						<FormGroup>
+							{isCategoriesLoading ? (
+								<Loader />
+							) : (
+								categories?.items?.map(cat => (
+									<FormControlLabel
+										key={cat.slug}
+										control={
+											<Checkbox
+												size="small"
+												checked={activeCategories.includes(cat.slug)}
+												onChange={() => toggleFilter('category', cat.slug)}
+											/>
+										}
+										label={<Typography variant="body2">{cat.name}</Typography>}
+									/>
+								))
+							)}
+						</FormGroup>
+					</AccordionDetails>
+				</Accordion>
+			</Box>
 
-			<Divider sx={{ mb: 2 }} />
-			{/* TODO: ADD PRICE RANGE AND STOCK FILTER IN BACKEND */}
-
-			{/* 3. PRICE RANGE */}
-			{/* <Typography variant="subtitle2" fontWeight="bold" mb={1}>
-				Price Range (NGN)
-			</Typography>
-			<Box display="flex" gap={1} mb={2}>
-				<TextField
-					label="Min"
-					size="small"
-					type="number"
-					value={queryParams.min_price || ''}
-					onChange={e => setFilter('min_price', e.target.value)}
-				/>
-				<TextField
-					label="Max"
-					size="small"
-					type="number"
-					value={queryParams.max_price || ''}
-					onChange={e => setFilter('max_price', e.target.value)}
-				/>
-			</Box> */}
-
-			{/* <Divider sx={{ mb: 2 }} /> */}
-
-			{/* 4. STOCK FILTER */}
-			{/* <FormControlLabel
-				control={<Checkbox checked={!!queryParams.in_stock} onChange={e => setFilter('in_stock', e.target.checked)} />}
-				label={
-					<Typography variant="body2" fontWeight="bold">
-						In Stock Only
-					</Typography>
-				}
-			/> */}
+			{/* FIX: Removed the "Show Results" button from here as requested */}
 		</Box>
 	);
 };

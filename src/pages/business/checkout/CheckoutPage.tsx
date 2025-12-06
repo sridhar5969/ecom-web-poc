@@ -55,7 +55,7 @@ const CheckoutPage: React.FC = () => {
 		resolver: zodResolver(checkoutSchema),
 		defaultValues: {
 			useShippingAsBilling: true,
-			paymentMethod: 'cod',
+			paymentMethod: 'online',
 			shippingAddress: {
 				country: 'US'
 			}

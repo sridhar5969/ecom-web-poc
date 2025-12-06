@@ -70,7 +70,7 @@ const AuthRegister = () => {
 
 				window.location.href = returnUrl;
 			} else {
-				navigate('/auth/login');
+				navigate('/cart');
 			}
 		} catch (err: any) {
 			setError(err?.data?.message || 'Registration failed. Please try again.');

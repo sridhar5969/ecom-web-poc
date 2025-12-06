@@ -44,7 +44,7 @@ export const authApi = rootApi.injectEndpoints({
 
 					// Note: Backend might not return refresh token in some modes, handle gracefully
 					// For now we default to empty string if missing to satisfy types
-					const refreshToken = response.data.refreshToken || '';
+					const refreshToken = response.data?.refreshToken || '';
 
 					// 1. Manually sync to localStorage for non-Redux usage (optional but safe)
 					if (accessToken) {
@@ -81,13 +81,13 @@ export const authApi = rootApi.injectEndpoints({
 			}) => {
 				console.log('✅ Register Response:', response);
 				if (typeof response === 'object' && response !== null) {
-					const backendResponse = response 
+					const backendResponse = response;
 
 					if (backendResponse.success === true && backendResponse.data) {
-						const { accessToken, refreshToken } = backendResponse.data;
+						const { accessToken } = backendResponse.data;
 						if (accessToken) {
-							TokenStorage.setTokens(accessToken, refreshToken || '');
-							return { accessToken, refreshToken: refreshToken || '' } as LoginRes;
+							TokenStorage.setTokens(accessToken, '');
+							return { accessToken, refreshToken: '' } as LoginRes;
 						}
 					}
 				}

@@ -9,7 +9,7 @@ import { rootApi } from '..';
  * In localStorage mode: { accessToken: string, refreshToken: string }
  * In cookie mode: {} (empty object)
  */
-export type LoginRes = Record<string, never> | { accessToken: string; refreshToken: string };
+export type LoginRes = Record<string, never> | { accessToken?: string; refreshToken?: string };
 
 /**
  * Logout response type
@@ -27,32 +27,37 @@ export const authApi = rootApi.injectEndpoints({
 					body: data
 				};
 			},
-			transformResponse: (response: unknown) => {
-				// Since rawBaseQuery is used, we receive the full backend response structure:
-				// { success: true, data: { accessToken, refreshToken }, message: string, timestamp: string }
-				// In localStorage mode: Backend returns { success: true, data: { accessToken, refreshToken }, ... }
-				// In cookie mode: Backend returns { success: true, data: {}, ... }
-				if (typeof response === 'object' && response !== null) {
-					const backendResponse = response as {
-						success?: boolean;
-						data?: { accessToken?: string; refreshToken?: string };
-					};
+			transformResponse: (response: {
+				success: boolean;
+				timestamp: string;
+				data: {
+					role: string;
+					authMethod: string;
+					accessToken: string;
+					refreshToken?: string;
+				};
+				message: string;
+			}) => {
+				if (response.success && response.data) {
+					const { accessToken } = response.data;
+					console.log('✅ 1. API Response received token:', accessToken);
 
-					// If in localStorage mode and tokens are present, store them
-					if (env.VITE_AUTH_MODE === 'localStorage' && backendResponse.success === true && backendResponse.data) {
-						const { accessToken, refreshToken } = backendResponse.data;
-						if (accessToken && refreshToken) {
-							TokenStorage.setTokens(accessToken, refreshToken);
-							return { accessToken, refreshToken } as LoginRes;
-						}
+					// Note: Backend might not return refresh token in some modes, handle gracefully
+					// For now we default to empty string if missing to satisfy types
+					const refreshToken = response.data.refreshToken || '';
+
+					// 1. Manually sync to localStorage for non-Redux usage (optional but safe)
+					if (accessToken) {
+						console.log('✅ 2. Setting TokenStorage manually');
+						TokenStorage.setTokens(accessToken, refreshToken);
 					}
-					// Cookie mode or no tokens: return empty object
-					return {} as LoginRes;
+
+					// 2. Return tokens so they are passed to authSlice -> Redux Store -> redux-persist
+					return { accessToken, refreshToken } as LoginRes;
 				}
-				logger.error('Login response validation failed', new Error('Invalid response type'), {
-					response
-				});
-				throw new Error('Invalid login response structure');
+
+				console.log('❌ API Response missing success or data:', response);
+				return {} as LoginRes;
 			}
 		}),
 
@@ -63,6 +68,30 @@ export const authApi = rootApi.injectEndpoints({
 					method: 'post',
 					body: data
 				};
+			},
+			transformResponse: (response: {
+				success: boolean;
+				timestamp: string;
+				data: {
+					role: string;
+					authMethod: string;
+					accessToken: string;
+				};
+				message: string;
+			}) => {
+				console.log('✅ Register Response:', response);
+				if (typeof response === 'object' && response !== null) {
+					const backendResponse = response 
+
+					if (backendResponse.success === true && backendResponse.data) {
+						const { accessToken, refreshToken } = backendResponse.data;
+						if (accessToken) {
+							TokenStorage.setTokens(accessToken, refreshToken || '');
+							return { accessToken, refreshToken: refreshToken || '' } as LoginRes;
+						}
+					}
+				}
+				return {} as LoginRes;
 			}
 		}),
 

@@ -36,14 +36,14 @@ class TokenStorage {
 	 * Set both access and refresh tokens
 	 */
 	static setTokens(accessToken: string, refreshToken: string): void {
-		if (env.VITE_AUTH_MODE === 'localStorage') {
+		// if (env.VITE_AUTH_MODE === 'localStorage') {
 			localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
 			localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
-		} else {
+		// } else {
 			// Cookie mode - In cookie mode, backend sets cookies automatically
 			// This method is mainly for localStorage mode, but we keep it for consistency
 			// If needed in cookie mode, cookies are set by the server response
-		}
+		// }
 	}
 
 	/**

@@ -12,8 +12,11 @@ const apiReducers = apiSlices.reduce(
 	{} as Record<string, (typeof apiSlices)[number]['reducer']>
 );
 
+import authReducer from '../slices/auth.slice';
+
 // Combine ALL reducers from imported slices
 const rootReducer = combineReducers({
+	auth: authReducer,
 	...apiReducers
 });
 

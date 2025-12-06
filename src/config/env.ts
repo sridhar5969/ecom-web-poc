@@ -37,7 +37,7 @@ const envSchema = z.object({
 	VITE_LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).optional().default('info'),
 
 	// Authentication Mode
-	VITE_AUTH_MODE: z.enum(['cookie', 'localStorage']).optional().default('cookie')
+	VITE_AUTH_MODE: z.enum(['cookie', 'localStorage']).optional().default('localStorage')
 });
 
 /**

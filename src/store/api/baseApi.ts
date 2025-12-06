@@ -1,5 +1,5 @@
 import { fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError, BaseQueryApi } from '@reduxjs/toolkit/query';
 import { env } from '../../config/env';
 import type { SuccessResponse, ErrorResponse, RtkQueryError } from '../../types/api.types';
 import { logger, logApiError } from '../../services/logger/logger.service';
@@ -20,16 +20,22 @@ let refreshTokenPromise: Promise<boolean> | null = null;
 export const rawBaseQuery = fetchBaseQuery({
 	baseUrl: env.API_BASE_URL,
 	credentials: env.VITE_AUTH_MODE === 'cookie' ? 'include' : 'omit',
-	prepareHeaders: headers => {
+	prepareHeaders: (headers, api) => {
 		const sessionId = getOrCreateSessionId();
 		if (sessionId) headers.set('x-session-id', sessionId);
 		// Add Authorization header when in localStorage mode
-		if (env.VITE_AUTH_MODE === 'localStorage') {
-			const token = TokenStorage.getAccessToken();
+		// if (env.VITE_AUTH_MODE === 'localStorage') {
+			// We use api.getState() to access the Redux store. 
+			// Since we use redux-persist, this state is automatically rehydrated from localStorage.
+			const state = api.getState() as any;
+			const token = state.auth?.accessToken;
+
+			console.log('🔒 Attaching Token from Redux State:', token ? 'Yes' : 'No');
+
 			if (token) {
 				headers.set('authorization', `Bearer ${token}`);
 			}
-		}
+		// }
 		return headers;
 	}
 });
@@ -60,7 +66,7 @@ const transformErrorResponse = (errorResponse: ErrorResponse, status?: number): 
  * Returns true if refresh was successful, false otherwise
  * Uses Promise deduplication to ensure only one refresh happens at a time
  */
-const attemptTokenRefresh = async (api, extraOptions): Promise<boolean> => {
+const attemptTokenRefresh = async (api: BaseQueryApi, extraOptions: Record<string, unknown>): Promise<boolean> => {
 	if (refreshTokenPromise) return refreshTokenPromise;
 
 	refreshTokenPromise = (async () => {
@@ -70,16 +76,19 @@ const attemptTokenRefresh = async (api, extraOptions): Promise<boolean> => {
 			const refreshArgs: FetchArgs =
 				env.VITE_AUTH_MODE === 'localStorage'
 					? {
-							url: 'auth/refresh',
-							method: 'POST',
-							body: { refreshToken: TokenStorage.getRefreshToken() },
-							credentials: 'include'
-						}
+						url: 'auth/refresh',
+						method: 'POST',
+						body: {
+							// Use refresh token from Redux state
+							refreshToken: (api.getState() as any).auth?.refreshToken
+						},
+						credentials: 'include'
+					}
 					: {
-							url: 'auth/refresh',
-							method: 'POST',
-							credentials: 'include'
-						};
+						url: 'auth/refresh',
+						method: 'POST',
+						credentials: 'include'
+					};
 
 			const refresh = await rawBaseQuery(refreshArgs, api, extraOptions);
 
@@ -87,7 +96,7 @@ const attemptTokenRefresh = async (api, extraOptions): Promise<boolean> => {
 				if (!refresh.data.success) return false;
 
 				if (env.VITE_AUTH_MODE === 'localStorage' && refresh.data.data) {
-					const tokens = refresh.data.data;
+					const tokens = refresh.data.data as { accessToken: string; refreshToken: string };
 					if (tokens.accessToken && tokens.refreshToken) {
 						TokenStorage.setTokens(tokens.accessToken, tokens.refreshToken);
 					}
@@ -173,7 +182,10 @@ export const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryE
 			console.log('refresh tried');
 			// Only skip refresh when using localStorage mode and the refresh token is missing.
 			// In cookie auth mode the server may rely on http-only cookies, so allow the refresh attempt.
-			if (env.VITE_AUTH_MODE === 'localStorage' && !TokenStorage.getRefreshToken()) {
+			if (
+				env.VITE_AUTH_MODE === 'localStorage' &&
+				!(api.getState() as any).auth?.refreshToken
+			) {
 				return result; // ← prevent refresh attempts for public routes or missing token
 			}
 
@@ -212,11 +224,11 @@ export const baseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryE
  */
 export const createPrefixedBaseQuery =
 	(prefix: string): BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =>
-	async (args, api, extraOptions) => {
-		const modifiedArgs = typeof args === 'string' ? `${prefix}${args}` : { ...args, url: `${prefix}${args.url}` };
+		async (args, api, extraOptions) => {
+			const modifiedArgs = typeof args === 'string' ? `${prefix}${args}` : { ...args, url: `${prefix}${args.url}` };
 
-		return baseQuery(modifiedArgs, api, extraOptions);
-	};
+			return baseQuery(modifiedArgs, api, extraOptions);
+		};
 
 /**
  * Type guard for RTK Query error

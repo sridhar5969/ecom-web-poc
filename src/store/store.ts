@@ -1,6 +1,8 @@
 // third-party
 import { Middleware, configureStore, isRejectedWithValue } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
+import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 
 // project import
 import appReducer from './reducers';
@@ -21,62 +23,74 @@ import { isDevelopment } from '../config/env';
  */
 export const rtkQueryErrorLogger: Middleware =
 	({ dispatch }) =>
-	next =>
-	action => {
-		if (isRejectedWithValue(action)) {
-			const { status, data } =
-				(action.payload as {
-					status?: number;
-					data?: ErrorResponse;
-					error?: string;
-				}) || {};
+		next =>
+			action => {
+				if (isRejectedWithValue(action)) {
+					const { status, data } =
+						(action.payload as {
+							status?: number;
+							data?: ErrorResponse;
+							error?: string;
+						}) || {};
 
-			// Extract error message from backend ErrorResponse format
-			// baseQuery already transforms errors, so data should be ErrorResponse if present
-			let errorMessage: string = ERROR_MESSAGES.SERVER_ERROR;
-			let validationErrors: Record<string, string[]> | undefined;
+					// Extract error message from backend ErrorResponse format
+					// baseQuery already transforms errors, so data should be ErrorResponse if present
+					let errorMessage: string = ERROR_MESSAGES.SERVER_ERROR;
+					let validationErrors: Record<string, string[]> | undefined;
 
-			if (data && typeof data === 'object' && 'success' in data && data.success === false) {
-				errorMessage = data.message;
-				validationErrors = data.errors;
-			}
+					if (data && typeof data === 'object' && 'success' in data && data.success === false) {
+						errorMessage = data.message;
+						validationErrors = data.errors;
+					}
 
-			// Handle 401 unauthorized - logout user
-			if (status === HTTP_STATUS.UNAUTHORIZED) {
-				dispatch(logoutApp());
-				logger.warn('Session expired, logging out user', { statusCode: status });
-				notificationService.error(ERROR_MESSAGES.SESSION_EXPIRED, 'Session Expired');
-			} else {
-				// Show error notification with validation errors if present
-				if (validationErrors && Object.keys(validationErrors).length > 0) {
-					const validationMessages = Object.entries(validationErrors)
-						.flatMap(([field, messages]) => messages.map(msg => `${field}: ${msg}`))
-						.join('\n');
-					const message =
-						validationMessages.length > 200
-							? `${errorMessage}\n\n${validationMessages.substring(0, 200)}...`
-							: `${errorMessage}\n\n${validationMessages}`;
-					notificationService.error(message, 'Validation Error');
-				} else {
-					notificationService.error(errorMessage, 'Error');
+					// Handle 401 unauthorized - logout user
+					if (status === HTTP_STATUS.UNAUTHORIZED) {
+						dispatch(logoutApp());
+						logger.warn('Session expired, logging out user', { statusCode: status });
+						notificationService.error(ERROR_MESSAGES.SESSION_EXPIRED, 'Session Expired');
+					} else {
+						// Show error notification with validation errors if present
+						if (validationErrors && Object.keys(validationErrors).length > 0) {
+							const validationMessages = Object.entries(validationErrors)
+								.flatMap(([field, messages]) => messages.map(msg => `${field}: ${msg}`))
+								.join('\n');
+							const message =
+								validationMessages.length > 200
+									? `${errorMessage}\n\n${validationMessages.substring(0, 200)}...`
+									: `${errorMessage}\n\n${validationMessages}`;
+							notificationService.error(message, 'Validation Error');
+						} else {
+							notificationService.error(errorMessage, 'Error');
+						}
+					}
 				}
-			}
-		}
-		return next(action);
-	};
+				return next(action);
+			};
+
+const persistConfig = {
+	key: 'root',
+	storage,
+	whitelist: ['auth']
+};
+
+const persistedReducer = persistReducer(persistConfig, appReducer);
 
 export const store = configureStore({
-	reducer: appReducer,
+	reducer: persistedReducer,
 	devTools: isDevelopment(),
 	middleware: getDefaultMiddleware =>
 		getDefaultMiddleware({
-			serializableCheck: false
+			serializableCheck: {
+				ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER]
+			}
 		}).concat([
 			// Auto-register all API middleware
 			...apiSlices.map(api => api.middleware),
 			rtkQueryErrorLogger
 		] as Middleware[])
 });
+
+export const persistor = persistStore(store);
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

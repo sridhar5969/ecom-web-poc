@@ -6,10 +6,11 @@ import { msalInstance } from './config';
 
 // Redux
 import { Provider as ReduxProvider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
 
 // Project files
 import App from './App';
-import { store } from './store/store';
+import { store, persistor } from './store/store';
 import { performanceMonitor } from './services/performance/performance.service';
 import { env } from './config/env';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
@@ -27,9 +28,11 @@ root.render(
 		<ErrorBoundary>
 			<MsalProvider instance={msalInstance}>
 				<ReduxProvider store={store}>
-					<BrowserRouter>
-						<App />
-					</BrowserRouter>
+					<PersistGate loading={null} persistor={persistor}>
+						<BrowserRouter>
+							<App />
+						</BrowserRouter>
+					</PersistGate>
 				</ReduxProvider>
 			</MsalProvider>
 		</ErrorBoundary>
